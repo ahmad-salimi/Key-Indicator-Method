@@ -1,0 +1,1582 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="utf-8" />
+    <title>ابزار KIM-BM (جابجایی بدنی)</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css">
+    <style>
+        /* ---------------------- CSS Variables ---------------------- */
+        :root {
+            --primary-color: #007bff;
+            --secondary-color: #6c757d;
+            --bg-color: #f8f9fa;
+            --card-bg: #ffffff;
+            --card-border: #e9ecef;
+            --text-color: #212529;
+            --spacing: 16px;
+            --border-radius: 8px;
+            --table-header-bg: #e9ecef;
+            --disabled-color: #e9ecef;
+            --disabled-text: #6c757d;
+        }
+
+        /* ---------------------- Base Styles ---------------------- */
+        body {
+            font-family: Vazirmatn, Tahoma, sans-serif;
+            direction: rtl;
+            text-align: right;
+            max-width: 1100px;
+            margin: 24px auto;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            padding: 0 var(--spacing);
+            line-height: 1.6;
+        }
+        h1 { 
+            text-align: center; 
+            color: var(--primary-color);
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            text-align: center;
+            color: var(--secondary-color);
+            margin-bottom: 30px;
+            font-size: 1.1rem;
+        }
+        h2 { 
+            text-align: right; 
+            font-size: 1.6rem; 
+            color: var(--primary-color); 
+            border-bottom: 2px solid var(--primary-color); 
+            padding-bottom: 5px; 
+            margin-top: 30px; 
+        }
+        h3 {
+            font-size: 1.3rem;
+            color: var(--secondary-color);
+            margin: 20px 0 10px 0;
+        }
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: var(--border-radius);
+            padding: var(--spacing);
+            margin-bottom: 24px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+        }
+        .score-box {
+            font-weight: bold;
+            font-size: 1.3em;
+            margin-top: 16px;
+            padding: 15px;
+            background-color: #e9f5ff;
+            border: 2px solid #cce5ff;
+            border-radius: var(--border-radius);
+            text-align: center;
+            color: var(--primary-color);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+        
+        /* ---------------------- Interactive Styles ---------------------- */
+        .selectable-cell, 
+        .single-select-row,
+        .complex-table tbody td.selectable-cell { 
+            cursor: pointer;
+            transition: background-color 0.2s; 
+        }
+        
+        .selectable-cell:hover:not(.selected):not(.disabled),
+        .single-select-row:hover:not(.selected-row):not(.disabled),
+        .complex-table tbody td.selectable-cell:hover:not(.selected):not(.disabled) { 
+             background-color: #f3f3f3 !important; 
+        }
+
+        .selectable-cell.selected {
+            background-color: #e9f5ff !important;
+            box-shadow: 0 0 0 3px var(--primary-color) inset;
+            font-weight: bold;
+            color: var(--text-color);
+        }
+        
+        .single-select-row.selected-row td {
+            background-color: #e9f5ff !important;
+            box-shadow: 0 0 0 3px var(--primary-color) inset;
+            font-weight: bold;
+            color: var(--text-color);
+        }
+
+        /* ---------------------- Disabled State ---------------------- */
+        .disabled {
+            background-color: var(--disabled-color) !important;
+            color: var(--disabled-text) !important;
+            cursor: not-allowed !important;
+        }
+        
+        .disabled td {
+            background-color: var(--disabled-color) !important;
+            color: var(--disabled-text) !important;
+        }
+
+        /* ---------------------- General Table Styles ---------------------- */
+        .score-table, .single-select-row-table, .complex-table { 
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+            margin-top: 15px;
+        }
+        .score-table th, .score-table td,
+        .single-select-row-table th, .single-select-row-table td,
+        .complex-table th, .complex-table td { 
+            border: 1px solid #a9a9a9; 
+            padding: 8px 3px;
+            text-align: center;
+            vertical-align: middle;
+            background-color: #ffffff;
+        }
+        .score-table thead th, .single-select-row-table thead th, .complex-table thead th { 
+            background-color: var(--table-header-bg); 
+            font-weight: bold;
+            color: var(--text-color);
+        }
+        
+        /* Complex table specific styles */
+        .complex-table td:first-child {
+            font-weight: bold;
+            text-align: right;
+            padding-right: 15px;
+        }
+        
+        .complex-table .image-cell {
+            width: 60px;
+            padding: 5px;
+        }
+        
+        .complex-table .image-cell img {
+            max-width: 50px;
+            max-height: 50px;
+            display: block;
+            margin: 0 auto;
+        }
+
+        /* ---------------------- Section Selection ---------------------- */
+        .section-selection {
+            display: flex;
+            gap: 20px;
+            margin: 20px 0;
+            justify-content: center;
+        }
+        .section-option {
+            flex: 1;
+            max-width: 300px;
+            padding: 20px;
+            border: 2px solid var(--card-border);
+            border-radius: var(--border-radius);
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .section-option:hover {
+            border-color: var(--primary-color);
+            background-color: #f8f9fa;
+        }
+        .section-option.selected {
+            border-color: var(--primary-color);
+            background-color: #e9f5ff;
+            font-weight: bold;
+        }
+        .section-option h3 {
+            margin: 0 0 10px 0;
+            color: var(--primary-color);
+        }
+        .section-image {
+            width: 100px;
+            height: 80px;
+            margin: 10px auto;
+            background-color: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+        .section-image img {
+            max-width: 90%;
+            max-height: 90%;
+            object-fit: contain;
+        }
+
+        /* ---------------------- Final Calculation Styles ---------------------- */
+        .final-calc-table { 
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+            margin-top: 15px;
+        }
+        .final-calc-table th, .final-calc-table td {
+            border: 1px solid #a9a9a9; 
+            padding: 10px 5px;
+            text-align: center;
+            vertical-align: middle;
+        }
+        .final-calc-table thead th {
+            background-color: var(--table-header-bg); 
+            font-weight: bold;
+        }
+        .final-calc-table tbody th {
+            text-align: right;
+            padding-right: 15px;
+            background-color: #f5f5f5;
+            width: 40%;
+        }
+        .final-score-row th, .final-score-row td {
+            font-size: 1.2em;
+            font-weight: bold;
+            background-color: #fffacd !important;
+        }
+        .final-score-cell {
+            min-width: 100px;
+        }
+        .final-calc-table .merged-cell-score {
+            background-color: #e9ecef !important;
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+        .final-calc-table .sub-total-row th,
+        .final-calc-table .sub-total-row td {
+            background-color: #e6f7ff !important;
+            font-weight: bold;
+        }
+        .final-calc-table .disabled-cell {
+            background-color: var(--disabled-color) !important;
+            color: var(--disabled-text);
+        }
+
+        /* ---------------------- Risk Assessment Styles ---------------------- */
+        #finalMaxScoreDisplay {
+            margin-top: 25px;
+            padding: 20px;
+            background-color: #e9f5ff;
+            border: 2px solid var(--primary-color);
+            border-radius: 8px;
+            text-align: center;
+            font-size: 1.6rem;
+            font-weight: bold;
+            color: var(--primary-color);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        #finalMaxScoreDisplay #final-max-score-value {
+            color: var(--primary-color);
+            font-size: 1.2em;
+            margin-right: 10px;
+        }
+
+        .risk-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            font-size: 0.9rem;
+        }
+        .risk-table th, .risk-table td {
+            border: 1px solid #a9a9a9;
+            padding: 10px 8px;
+            text-align: right;
+            vertical-align: top;
+        }
+        .risk-table thead th {
+            background-color: var(--table-header-bg);
+            font-weight: bold;
+            text-align: center;
+            width: 15%;
+        }
+        .risk-table thead th:nth-child(2) { width: 15%; }
+        .risk-table thead th:nth-child(3) { width: 10%; }
+        .risk-table thead th:nth-child(4) { width: 45%; }
+        .risk-table thead th:nth-child(5) { width: 15%; }
+
+        .risk-table tbody td:first-child,
+        .risk-table tbody td:nth-child(2),
+        .risk-table tbody td:nth-child(3) {
+            text-align: center;
+            font-weight: bold;
+        }
+        .risk-table tbody td:nth-child(5) {
+            text-align: justify;
+        }
+        
+        /* Risk Color Palette */
+        .risk-row-1 { background-color: #00E64D !important; color: #155724 !important; }
+        .risk-row-2 { background-color: #FFFF66 !important; color: #856404 !important; }
+        .risk-row-3 { background-color: #FF9933 !important; color: #7f552e !important; }
+        .risk-row-4 { background-color: #FF3333 !important; color: #721c24 !important; }
+
+        .risk-table tbody tr.current-risk-level {
+            box-shadow: 0 0 0 4px #000000 inset;
+        }
+
+        /* ---------------------- Form Controls ---------------------- */
+        .custom-input { display: flex; align-items: center; margin-top: 10px; }
+        .custom-input input { direction: ltr; padding: 8px 10px; border-radius: 4px; border: 1px solid #ced4da; }
+        
+        .reset-container { text-align: right; margin-bottom: 20px; }
+        #resetForm { 
+            padding: 10px 20px; 
+            font-weight: bold; 
+            border-radius: 4px; 
+            border: 1px solid var(--primary-color); 
+            background-color: var(--card-bg); 
+            color: var(--primary-color); 
+            cursor: pointer; 
+            font-family: Vazirmatn, Tahoma, sans-serif;
+        }
+        #printButton {
+            padding: 12px 25px;
+            margin: 30px auto;
+            display: block;
+            font-weight: bold;
+            border-radius: 6px;
+            border: none;
+            background-color: var(--primary-color);
+            color: white;
+            cursor: pointer;
+            font-size: 1.1rem;
+        }
+
+        /* ---------------------- Metadata Styles ---------------------- */
+        .metadata-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: var(--border-radius);
+            padding: var(--spacing);
+            margin-bottom: 24px;
+        }
+        .metadata-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 12px;
+        }
+        .metadata-field {
+            display: flex;
+            flex-direction: column;
+        }
+        .metadata-field label {
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: var(--secondary-color);
+        }
+        .metadata-field input, .metadata-field select {
+            padding: 8px 12px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            font-family: Vazirmatn, Tahoma, sans-serif;
+        }
+
+        /* ---------------------- Checkbox Styles ---------------------- */
+        .checkbox-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 15px 0;
+        }
+        .checkbox-container input[type="checkbox"] {
+            margin-left: 8px;
+            transform: scale(1.2);
+        }
+
+        /* ---------------------- Section B Image Styles ---------------------- */
+        .section-b-image-container {
+            text-align: center;
+            margin-bottom: 15px;
+            padding: 10px;
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 4px;
+        }
+        .section-b-image-container img {
+            max-width: 150px;
+            height: auto;
+        }
+
+        /* ---------------------- Print Styles ---------------------- */
+        @media print {
+            @page {
+                size: A4 portrait;
+                margin: 0.3cm;
+            }
+            body { 
+                padding: 0; 
+                margin: 0;
+                font-size: 7pt;
+                -webkit-print-color-adjust: exact !important;
+                color-adjust: exact !important;
+                line-height: 1.1;
+            }
+            
+            /* Hide everything except the three main sections */
+            body > *:not(.metadata-card):not(#step8-card):not(.risk-table-container) {
+                display: none !important;
+            }
+            
+            #printButton, .reset-container, .section-selection,
+            .no-print {
+                display: none !important;
+            }
+            
+            /* Show only the three main sections */
+            .metadata-card,
+            #step8-card,
+            .risk-table-container {
+                display: block !important;
+                page-break-inside: avoid;
+                break-inside: avoid;
+            }
+            
+            /* Compact metadata section */
+            .metadata-card {
+                box-shadow: none;
+                border: 1px solid #ccc;
+                margin-bottom: 5px;
+                padding: 5px;
+            }
+            .metadata-card h2 {
+                font-size: 9pt;
+                margin: 3px 0;
+                border-bottom: 1px solid var(--primary-color);
+            }
+            .metadata-row {
+                gap: 5px;
+                margin-bottom: 4px;
+                grid-template-columns: 1fr 1fr;
+            }
+            .metadata-field {
+                font-size: 6pt;
+            }
+            .metadata-field label {
+                margin-bottom: 2px;
+                font-size: 6pt;
+            }
+            .metadata-field input, .metadata-field select {
+                padding: 2px 4px;
+                font-size: 6pt;
+                height: 20px;
+            }
+            
+            /* Compact final calculation */
+            #step8-card {
+                width: 100% !important;
+                margin: 2px 0 !important;
+                padding: 5px !important;
+                box-shadow: none !important;
+                border: none !important;
+            }
+            
+            #step8-card h2 { 
+                font-size: 8pt; 
+                margin: 3px 0 2px 0; 
+                border-bottom: 1px solid var(--primary-color);
+            }
+            #step8-card h3 { 
+                font-size: 7pt; 
+                margin: 2px 0 1px 0; 
+            }
+
+            .final-calc-table {
+                width: 100% !important;
+                table-layout: fixed;
+                font-size: 5.5pt !important;
+                line-height: 1;
+                margin-top: 5px;
+            }
+
+            .final-calc-table th, .final-calc-table td {
+                padding: 1px !important;
+                word-wrap: break-word;
+                text-align: center;
+            }
+            
+            .final-calc-table tbody th { 
+                text-align: right !important;
+                padding-right: 4px !important;
+                font-size: 5.5pt;
+            }
+
+            #finalMaxScoreDisplay {
+                font-size: 7pt !important;
+                padding: 3px !important;
+                margin: 3px 0 !important;
+            }
+
+            /* Compact risk table */
+            .risk-table-container {
+                margin-top: 2px;
+            }
+            .risk-table {
+                width: 100% !important;
+                table-layout: fixed;
+                font-size: 5.5pt !important;
+                line-height: 1;
+                margin-top: 3px;
+            }
+
+            .risk-table th, .risk-table td {
+                padding: 1px 2px !important;
+                word-wrap: break-word;
+            }
+
+            .risk-table th:nth-child(1) { width: 5%; }
+            .risk-table th:nth-child(2) { width: 10%; }
+            .risk-table th:nth-child(3) { width: 8%; }
+            .risk-table th:nth-child(4) { width: 52%; }
+            .risk-table th:nth-child(5) { width: 25%; }
+            
+            .risk-table td:nth-child(4), .risk-table td:nth-child(5) {
+                text-align: right !important;
+                padding: 1px 3px !important;
+            }
+
+            /* Ensure everything fits on one page */
+            .metadata-card,
+            #step8-card,
+            .risk-table-container {
+                page-break-inside: avoid;
+                break-inside: avoid;
+            }
+
+            /* Color preservation */
+            .risk-table tbody tr, 
+            .final-score-row th, .final-score-row td, 
+            #finalMaxScoreDisplay, 
+            .final-calc-table .merged-cell-score,
+            .final-calc-table .sub-total-row th,
+            .final-calc-table .sub-total-row td,
+            .risk-row-1, .risk-row-2, .risk-row-3, .risk-row-4,
+            .risk-table tbody tr.current-risk-level {
+                -webkit-print-color-adjust: exact !important;
+                color-adjust: exact !important;
+            }
+            
+            .risk-row-1 { background-color: #00E64D !important; color: #155724 !important; }
+            .risk-row-2 { background-color: #FFFF66 !important; color: #856404 !important; }
+            .risk-row-3 { background-color: #FF9933 !important; color: #7f552e !important; }
+            .risk-row-4 { background-color: #FF3333 !important; color: #721c24 !important; }
+            .risk-table tbody tr.current-risk-level { 
+                box-shadow: 0 0 0 1px #000000 inset !important; 
+            }
+        }
+
+        /* Mobile responsive */
+        @media (max-width: 768px) {
+            body {
+                padding: 0 8px;
+            }
+            .section-selection {
+                flex-direction: column;
+            }
+            .section-option {
+                max-width: none;
+            }
+            .metadata-row {
+                grid-template-columns: 1fr;
+            }
+            .complex-table {
+                font-size: 0.7rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <h1 class="no-print">ابزار KIM-BM (جابجایی بدنی)</h1>
+    <div class="subtitle no-print">روش شاخص کلیدی برای ارزیابی و طراحی بار کار فیزیکی جابجایی بدنی</div>
+    
+    <div class="reset-container no-print">
+        <button id="resetForm">
+            بازنشانی فرم
+        </button>
+    </div>
+
+    <!-- Metadata Section -->
+    <div class="metadata-card" id="metadata-section">
+        <h2>مشخصات ارزیابی</h2>
+        <div class="metadata-row">
+            <div class="metadata-field">
+                <label for="location">محل کار / فعالیت فرعی:</label>
+                <input type="text" id="location" placeholder="مثلاً: حمل مبلمان بدون تجهیزات کمکی">
+            </div>
+            <div class="metadata-field">
+                <label for="evaluator">ارزیاب:</label>
+                <input type="text" id="evaluator" placeholder="نام ارزیاب">
+            </div>
+        </div>
+        <div class="metadata-row">
+            <div class="metadata-field">
+                <label for="workDuration">مدت زمان روز کاری (ساعت):</label>
+                <input type="number" id="workDuration" min="1" max="24" placeholder="8">
+            </div>
+            <div class="metadata-field">
+                <label for="subtaskDuration">مدت زمان فعالیت فرعی (دقیقه):</label>
+                <input type="number" id="subtaskDuration" min="1" max="480" placeholder="120">
+            </div>
+        </div>
+        <div class="metadata-row">
+            <div class="metadata-field">
+                <label for="assessmentDate">تاریخ ارزیابی:</label>
+                <input type="date" id="assessmentDate">
+            </div>
+            <div class="metadata-field">
+                <!-- Removed print date as requested -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Step 1: Time Score -->
+    <div class="card no-print" id="step1">
+        <h2>گام ۱: تعیین امتیاز زمان</h2>
+        
+        <p>لطفاً مدت زمان کل این فعالیت فرعی را در هر روز کاری مشخص کنید.</p>
+
+        <div class="force-table-container">
+            <table class="score-table">
+                <thead>
+                    <tr>
+                        <th class="label-cell">کل مدت این فعالیت فرعی در هر روز کاری [تا ... دقیقه]</th>
+                        <th>1 ></th><th>1-5</th><th>5-10</th><th>10-20</th><th>20-30</th><th>30-45</th>
+                        <th>45-60</th><th>60-100</th><th>100-150</th><th>150-210</th><th>210-270</th>
+                        <th>270-360</th><th>360-480</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="label-cell">امتیاز زمان</td>
+                        <td data-score="1" class="selectable-cell" data-group="time">1</td>
+                        <td data-score="1.5" class="selectable-cell" data-group="time">1.5</td>
+                        <td data-score="2" class="selectable-cell" data-group="time">2</td>
+                        <td data-score="2.5" class="selectable-cell" data-group="time">2.5</td>
+                        <td data-score="3" class="selectable-cell" data-group="time">3</td>
+                        <td data-score="3.5" class="selectable-cell" data-group="time">3.5</td>
+                        <td data-score="4" class="selectable-cell" data-group="time">4</td>
+                        <td data-score="5" class="selectable-cell" data-group="time">5</td>
+                        <td data-score="6" class="selectable-cell" data-group="time">6</td>
+                        <td data-score="7" class="selectable-cell" data-group="time">7</td>
+                        <td data-score="8" class="selectable-cell" data-group="time">8</td>
+                        <td data-score="9" class="selectable-cell" data-group="time">9</td>
+                        <td data-score="10" class="selectable-cell" data-group="time">10</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="custom-input">
+            <label for="timeCustom">یا وارد کردن مدت زمان دلخواه (دقیقه) برای درون‌یابی:</label>
+            <input id="timeCustom" type="number" min="1" max="480" step="1" placeholder="مثلاً 120">
+        </div>
+        
+        <div class="score-box" id="timeScore">امتیاز زمان: 1.0</div>
+    </div>
+
+    <!-- Section Selection -->
+    <div class="card no-print" id="section-selection">
+        <h2>انتخاب نوع جابجایی</h2>
+        <p>لطفاً نوع جابجایی را انتخاب کنید:</p>
+        
+        <div class="section-selection">
+            <div class="section-option" data-section="A">
+                <h3>بدون استفاده از تجهیزات کمکی</h3>
+                <div class="section-image">
+                    <img src="images/section-a.png" alt="بدون تجهیزات کمکی" onerror="this.style.display='none'">
+                </div>
+                <p>حرکات بدن بدون استفاده از تجهیزات حمل بار</p>
+            </div>
+            <div class="section-option" data-section="B">
+                <h3>با استفاده از تجهیزات کمکی</h3>
+                <div class="section-image">
+                    <img src="images/section-b.png" alt="با تجهیزات کمکی" onerror="this.style.display='none'">
+                </div>
+                <p>حرکت بدن هنگام رانندگی با نیروی عضلانی</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section A: Body Movement without Equipment -->
+    <div class="card no-print" id="section-a">
+        <h2>بخش A: تعیین امتیاز حرکات بدن بدون استفاده از تجهیزات</h2>
+
+        <h3>الف) نوع حرکت و وزن بار جابجا شده</h3>
+        <table class="complex-table" id="movement-type-table">
+            <thead>
+                <tr>
+                    <th style="width: 60px;">عکس</th>
+                    <th>نوع حرکت</th>
+                    <th>توضیحات</th>
+                    <th>بدون بار / &lt; 3</th>
+                    <th>3 ... 10</th>
+                    <th>&gt; 10 ... 15</th>
+                    <th>&gt; 15 ... 20</th>
+                    <th>&gt; 20 ... 25</th>
+                    <th>&gt; 25 ... 30</th>
+                    <th>&gt; 30 ... 35</th>
+                    <th>&gt; 35 ... 40</th>
+                    <th>&gt; 40</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Rows will be populated by JavaScript -->
+            </tbody>
+        </table>
+
+        <h3>ب) تعیین امتیاز نقطه مرکز بار برای بخش A</h3>
+        <table class="single-select-row-table">
+            <thead>
+                <tr>
+                    <th>شرح</th>
+                    <th>3 تا 15 کیلوگرم</th>
+                    <th>&gt; 15 ... 30 کیلوگرم</th>
+                    <th>&gt; 30 کیلوگرم</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>بدون بار یا بار کم‌تر از 3 کیلوگرم یا بار نزدیک به بدن در یک سبد یا کوله پشتی روی شانه‌ها</td>
+                    <td class="selectable-cell" data-score="0" data-group="load-center">0</td>
+                    <td class="selectable-cell" data-score="0" data-group="load-center">0</td>
+                    <td class="selectable-cell" data-score="0" data-group="load-center">0</td>
+                </tr>
+                <tr>
+                    <td>بار نزدیک به بدن نگه داشته شده یا روی یک شانه حمل شده</td>
+                    <td class="selectable-cell" data-score="4" data-group="load-center">4</td>
+                    <td class="selectable-cell" data-score="8" data-group="load-center">8</td>
+                    <td class="selectable-cell" data-score="12" data-group="load-center">12</td>
+                </tr>
+                <tr>
+                    <td>بار دور از بدن نگه داشته شده</td>
+                    <td class="selectable-cell" data-score="8" data-group="load-center">8</td>
+                    <td class="selectable-cell" data-score="12" data-group="load-center">12</td>
+                    <td class="selectable-cell" data-score="16" data-group="load-center">16</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h3>ج) تعیین امتیاز پوسچر بالاتنه برای بخش A</h3>
+        <table class="single-select-row-table">
+            <thead>
+                <tr>
+                    <th>شرح</th>
+                    <th>0 تا 15 کیلوگرم</th>
+                    <th>&gt; 15 ... 30 کیلوگرم</th>
+                    <th>&gt; 30 کیلوگرم</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>تنه به وضوح به جلو خم شده و/یا پیچش و/یا انحراف جانبی تنه قابل تشخیص است - گاه با گاه</td>
+                    <td class="selectable-cell" data-score="2" data-group="posture-a">2</td>
+                    <td class="selectable-cell" data-score="4" data-group="posture-a">4</td>
+                    <td class="selectable-cell" data-score="6" data-group="posture-a">6</td>
+                </tr>
+                <tr>
+                    <td>تنه به وضوح به جلو خم شده و/یا پیچش و/یا انحراف جانبی تنه قابل تشخیص است - مکرر/ثابت</td>
+                    <td class="selectable-cell" data-score="4" data-group="posture-a">4</td>
+                    <td class="selectable-cell" data-score="6" data-group="posture-a">6</td>
+                    <td class="selectable-cell" data-score="8" data-group="posture-a">8</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h3>د) تعیین امتیاز شرایط کاری نامطلوب برای بخش A</h3>
+        <table class="single-select-row-table">
+            <thead>
+                <tr>
+                    <th>شرایط کاری نامطلوب</th>
+                    <th>امتیاز</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="single-select-row" data-score="0" data-group="unfavorable-a">
+                    <td>هیچکدام: هیچ شرایط کاری نامطلوبی وجود ندارد</td>
+                    <td>0</td>
+                </tr>
+                <tr class="single-select-row" data-score="3" data-group="unfavorable-a">
+                    <td>محدود شده: فضای تنگ برای حرکت / تعادل کمتر به دلیل سطح متحرک یا شیب‌دار / مسیر شنی یا سنگ ریزه</td>
+                    <td>3</td>
+                </tr>
+                <tr class="single-select-row" data-score="5" data-group="unfavorable-a">
+                    <td>شدیداً محدود شده: آزادی حرکت مختل شده است / بدون وسایل کمکی صعود / فضای باز</td>
+                    <td>5</td>
+                </tr>
+                <tr class="single-select-row" data-score="15" data-group="unfavorable-a">
+                    <td>بحرانی: آزادی حرکت به دلیل فضاهای محدود و نقاط خطر شدیداً مختل شده است / دید محدود شده / بدون سکوی استراحت / کوه‌نوردی / استفاده از تجهیزات حفاظت تنفسی / زمین گل‌آلود</td>
+                    <td>15</td>
+                </tr>
+                <tr class="single-select-row" data-score="4" data-group="unfavorable-a-weather">
+                    <td>آب و هوا: تأثیرات شدید آب و هوایی - نادر/گهگاهی</td>
+                    <td>4</td>
+                </tr>
+                <tr class="single-select-row" data-score="8" data-group="unfavorable-a-weather">
+                    <td>آب و هوا: تأثیرات شدید آب و هوایی - مکرر/ثابت</td>
+                    <td>8</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="score-box" id="sectionAScore">امتیاز بخش A: 0</div>
+    </div>
+
+    <!-- Section B: Body Movement with Muscle Power -->
+    <div class="card no-print" id="section-b">
+        <h2>بخش B: تعیین امتیاز حرکات بدن هنگام رانندگی با نیروی عضلانی</h2>
+
+        <div class="section-b-image-container">
+            <img src="images/section-b-driving.png" alt="رانندگی با نیروی عضلانی" onerror="this.style.display='none'">
+        </div>
+
+        <h3>الف) سرعت حرکت و وزن بار</h3>
+        <table class="single-select-row-table">
+            <thead>
+                <tr>
+                    <th>سرعت حرکت / وزن بار قابل جابجایی شامل وسیله حمل و نقل (کیلوگرم)</th>
+                    <th>تا 50 کیلوگرم</th>
+                    <th>&gt; 50 ... 150 کیلوگرم</th>
+                    <th>&gt; 150 کیلوگرم</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>آهسته (&lt; 10 کیلومتر در ساعت)</td>
+                    <td class="selectable-cell" data-score="3" data-group="movement-speed">3</td>
+                    <td class="selectable-cell" data-score="6" data-group="movement-speed">6</td>
+                    <td class="selectable-cell" data-score="9" data-group="movement-speed">9</td>
+                </tr>
+                <tr>
+                    <td>با سرعت متوسط (10 ... 15 کیلومتر در ساعت)</td>
+                    <td class="selectable-cell" data-score="6" data-group="movement-speed">6</td>
+                    <td class="selectable-cell" data-score="10" data-group="movement-speed">10</td>
+                    <td class="selectable-cell" data-score="14" data-group="movement-speed">14</td>
+                </tr>
+                <tr>
+                    <td>سریع (&gt; 15 کیلومتر در ساعت)</td>
+                    <td class="selectable-cell" data-score="9" data-group="movement-speed">9</td>
+                    <td class="selectable-cell" data-score="15" data-group="movement-speed">15</td>
+                    <td class="selectable-cell" data-score="21" data-group="movement-speed">21</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h3>ب) تعیین امتیاز مسیر حرکت - شرایط کاری نامطلوب برای بخش B</h3>
+        <table class="single-select-row-table">
+            <thead>
+                <tr>
+                    <th>شرایط مسیر حرکت / وزن بار قابل جابجایی شامل وسیله حمل و نقل (کیلوگرم)</th>
+                    <th>تا 50 کیلوگرم</th>
+                    <th>&gt; 50 ... 150 کیلوگرم</th>
+                    <th>&gt; 150 کیلوگرم</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>مسیر حرکت محدود: مسیر خاکی یا سنگفرش شده، چاله‌ها، آلودگی شدید، شیب‌های مقطعی</td>
+                    <td class="selectable-cell" data-score="8" data-group="path-conditions">8</td>
+                    <td class="selectable-cell" data-score="12" data-group="path-conditions">12</td>
+                    <td class="selectable-cell" data-score="16" data-group="path-conditions">16</td>
+                </tr>
+                <tr class="single-select-row" data-score="4" data-group="path-weather">
+                    <td>آب و هوا: تأثیرات شدید آب و هوایی - نادر/گهگاهی</td>
+                    <td>4</td>
+                </tr>
+                <tr class="single-select-row" data-score="8" data-group="path-weather">
+                    <td>آب و هوا: تأثیرات شدید آب و هوایی - مکرر/ثابت</td>
+                    <td>8</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="score-box" id="sectionBScore">امتیاز بخش B: 0</div>
+    </div>
+
+    <!-- Task Variety -->
+    <div class="card no-print" id="step4">
+        <h2>تعیین امتیاز مربوط به تنوع و تکرار وظایف</h2>
+
+        <table class="single-select-row-table">
+            <thead>
+                <tr>
+                    <th>تعیین امتیاز مربوط به تنوع و تکرار وظایف</th>
+                    <th style="width: 80px;">امتیاز</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="single-select-row" data-score="0" data-group="task-variety">
+                    <td>مطلوب: تنوع زیاد فعالیت‌های فیزیکی در طول شیفت کاری به دلیل انجام کارهای مختلف (شامل فعالیت‌هایی با ماهیت متفاوت). همچنین، در طول شیفت، هیچ‌گونه فعالیت سنگین و طولانی‌مدت با ماهیت تکراری وجود ندارد.</td>
+                    <td>0</td>
+                </tr>
+                <tr class="single-select-row" data-score="2" data-group="task-variety">
+                    <td>محدود: تنوع کم در فعالیت‌های فیزیکی. همچنین، گاهی ممکن است فعالیت‌های سنگین کوتاه‌مدت با ماهیت تکراری وجود داشته باشد.</td>
+                    <td>2</td>
+                </tr>
+                <tr class="single-select-row" data-score="4" data-group="task-variety">
+                    <td>نامطلوب: تنوع کم در فعالیت‌های فیزیکی. همچنین، در طول شیفت، فعالیت‌های سنگین، فشرده و تکراری با ماهیت یکسان انجام می‌شود که گاهی با افزایش ناگهانی شدت یا مدت کار همراه است.</td>
+                    <td>4</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="score-box" id="taskVarietyScore">امتیاز تنوع و تکرار وظایف: 0</div>
+    </div>
+
+    <!-- Final Calculation and Risk Assessment -->
+    <div class="card" id="step8-card">
+        <h2>محاسبه امتیاز نهایی و تعیین سطح ریسک</h2>
+        
+        <h3>جدول محاسبه امتیاز نهایی</h3>
+        <div class="force-table-container">
+            <table class="final-calc-table">
+                <thead>
+                    <tr>
+                        <th rowspan="2" style="width: 40%;">شاخص</th>
+                        <th id="calc-header-a" colspan="1" style="width: 30%;">بخش A</th>
+                        <th id="calc-header-b" colspan="1" style="width: 30%; display: none;">بخش B</th>
+                    </tr>
+                    <tr>
+                        <th id="calc-subheader-a">امتیاز شاخص</th>
+                        <th id="calc-subheader-b" style="display: none;">امتیاز شاخص</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr id="calc-row-movement">
+                        <th id="calc-label-movement">حرکات بدن بدون استفاده از تجهیزات</th>
+                        <td id="calc-section-a">—</td>
+                        <td id="calc-section-b" style="display: none;">—</td>
+                    </tr>
+                    <tr id="calc-row-driving" style="display: none;">
+                        <th id="calc-label-driving">حرکت بدن هنگام رانندگی با نیروی عضلانی</th>
+                        <td>—</td>
+                        <td id="calc-section-b-driving" style="display: none;">—</td>
+                    </tr>
+                    <tr>
+                        <th>تنوع و تکرار وظایف</th>
+                        <td colspan="2" id="calc-variety-merged" class="merged-cell-score">—</td>
+                    </tr>
+                    <tr class="sub-total-row">
+                        <th>مجموع امتیازهای شاخص</th>
+                        <td id="calc-sum-a">—</td>
+                        <td id="calc-sum-b" style="display: none;">—</td>
+                    </tr>
+                    <tr class="final-score-row">
+                        <th>امتیاز زمان</th>
+                        <td colspan="2" id="final-time-merged" class="merged-cell-score">—</td>
+                    </tr>
+                    <tr class="final-score-row">
+                        <th>مجموع امتیازهای شاخص × امتیاز زمان</th>
+                        <td id="final-score-a" class="final-score-cell">—</td>
+                        <td id="final-score-b" class="final-score-cell" style="display: none;">—</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Gender Selection as Checkbox -->
+        <div class="checkbox-container">
+            <label>
+                <input type="checkbox" id="femaleWorker">
+                فعالیت توسط زنان انجام می‌شود (اعمال ضریب 1.3)
+            </label>
+        </div>
+
+        <div id="finalMaxScoreDisplay">
+            امتیاز نهایی: <span id="final-max-score-value">—</span>
+        </div>
+    </div>
+
+    <!-- Risk Table Container -->
+    <div class="risk-table-container">
+        <table class="risk-table" id="riskTable">
+            <thead>
+                <tr>
+                    <th>ریسک</th>
+                    <th>سطح ریسک</th>
+                    <th>شدت بار</th>
+                    <th>الف) احتمال اضافه بار فیزیکی<br>ب) پیامدهای احتمالی برای سلامتی</th>
+                    <th>اقدامات</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr id="risk-row-1" data-min="0" data-max="20">
+                    <td>1</td>
+                    <td>کمتر از 20</td>
+                    <td>پایین</td>
+                    <td class="consequence-action-cell">
+                        الف) احتمال اضافه بار فیزیکی کم است.<br>
+                        ب) هیچ خطری برای سلامتی پیش‌بینی نمی‌شود.
+                    </td>
+                    <td>نیازی نیست.</td>
+                </tr>
+                <tr id="risk-row-2" data-min="20" data-max="50">
+                    <td>2</td>
+                    <td>بین 20 تا کمتر از 50</td>
+                    <td>کمی افزایش یافته</td>
+                    <td class="consequence-action-cell">
+                        الف) احتمال اضافه بار فیزیکی برای افراد کم‌تحمل وجود دارد.<br>
+                        ب) خستگی و اختلال سازگاری با شدت کم که در زمان فراغت جبران می‌شود.
+                    </td>
+                    <td>برای افراد کم تحمل، بازطراحی محل کار و سایر اقدامات پیشگیرانه ممکن است مفید باشد.</td>
+                </tr>
+                <tr id="risk-row-3" data-min="50" data-max="100">
+                    <td>3</td>
+                    <td>بین 50 تا کمتر از 100</td>
+                    <td>به‌طور چشمگیری افزایش یافته</td>
+                    <td class="consequence-action-cell">
+                        الف) اضافه بار فیزیکی حتی برای افراد با تحمل متوسط نیز ممکن است رخ دهد.<br>
+                        ب) اختلالات (معمولاً همراه با درد) که ممکن است شامل اختلال عملکرد اندام‌ها باشد، در اکثر موارد موقتی هستند.
+                    </td>
+                    <td>بازطراحی و اقدامات پیشگیرانه باید مورد بررسی قرار گیرند.</td>
+                </tr>
+                <tr id="risk-row-4" data-min="100" data-max="999">
+                    <td>4</td>
+                    <td>برابر یا بیشتر از 100</td>
+                    <td>بالا</td>
+                    <td class="consequence-action-cell">
+                        الف) احتمال اضافه بار فیزیکی بالاست.<br>
+                        ب) آسیب‌های ساختاری قابل توجه با عواقب بیماری‌زا و اختلال عملکردی شدید.
+                    </td>
+                    <td>بازطراحی الزامی است و سایر اقدامات پیشگیرانه نیز باید مدنظر قرار گیرند.</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    
+    <button id="printButton" class="no-print">
+        🖨️ چاپ نتایج نهایی
+    </button>
+
+    <script>
+    // ---------------------- Data from Excel ----------------------
+    const movementData = [
+        {
+            type: "پیاده روی",
+            description: "آهسته",
+            scores: [4, 6, 8, 10, 12, 14, 25, 35, 100],
+            image: "walking-slow.png"
+        },
+        {
+            type: "پیاده روی",
+            description: "با سرعت متوسط (3 ... 5 کیلومتر در ساعت)",
+            scores: [8, 10, 12, 14, 16, 18, 30, 40, 100],
+            image: "walking-medium.png"
+        },
+        {
+            type: "پیاده روی",
+            description: "سریع",
+            scores: [12, 14, 16, 18, 20, 22, 35, 50, 100],
+            image: "walking-fast.png"
+        },
+        {
+            type: "بالا رفتن",
+            description: "زاویه شیب < 5 درجه",
+            scores: [10, 12, 14, 16, 18, 20, 35, 50, 100],
+            image: "climbing-low.png"
+        },
+        {
+            type: "بالا رفتن",
+            description: "زاویه شیب > 5 -15 درجه",
+            scores: [12, 14, 16, 18, 20, 22, 35, 50, 100],
+            image: "climbing-medium.png"
+        },
+        {
+            type: "بالا رفتن",
+            description: "زاویه شیب > 15 درجه",
+            scores: [24, 26, 28, 30, 32, 34, 40, 50, 100],
+            image: "climbing-high.png"
+        },
+        {
+            type: "بالا رفتن از پله",
+            description: "پله معمولی",
+            scores: [18, 20, 22, 24, 26, 50, 100, 100, 100],
+            image: "stairs-normal.png"
+        },
+        {
+            type: "بالا رفتن از پله",
+            description: "شیب دار (35 ... 50 درجه)",
+            scores: [24, 26, 28, 30, 50, 100, 100, 100, 100],
+            image: "stairs-steep.png"
+        },
+        {
+            type: "بالا رفتن از پله",
+            description: "شدیدا شیب دار (> 50 درجه)",
+            scores: [30, 32, 34, 50, 100, 100, 100, 100, 100],
+            image: "stairs-very-steep.png"
+        },
+        {
+            type: "بالا رفتن از نردبان",
+            description: "زاویه شیب بین 65 ... 75 درجه",
+            scores: [24, 26, 50, 100, 100, 100, 100, 100, 100],
+            image: "ladder.png"
+        },
+        {
+            type: "بالا رفتن (عمودی)",
+            description: "زاویه شیب > 80 درجه - حرکت عمودی روی پله‌های فلزی، نردبان‌های عمودی، نردبان‌های منهول",
+            scores: [30, 32, 50, 100, 100, 100, 100, 100, 100],
+            image: "vertical-climbing.png"
+        },
+        {
+            type: "سینه خیز رفتن، راه رفتن با خمش شدید",
+            description: "حرکت عمدتاً افقی در اتاق‌هایی با سقف کوتاه، تونل‌ها، سکوهای تعمیر و نگهداری، کانال‌ها",
+            scores: [24, 26, 50, 100, 100, 100, 100, 100, 100],
+            image: "crawling.png"
+        }
+    ];
+
+    // ---------------------- Initialize Movement Table ----------------------
+    function initializeMovementTable() {
+        const tbody = document.querySelector('#movement-type-table tbody');
+        tbody.innerHTML = '';
+
+        movementData.forEach((movement, index) => {
+            const row = document.createElement('tr');
+            
+            // Image cell
+            const imageCell = document.createElement('td');
+            imageCell.className = 'image-cell';
+            const img = document.createElement('img');
+            img.src = `images/${movement.image}`;
+            img.alt = movement.description;
+            img.onerror = function() { this.style.display = 'none'; };
+            imageCell.appendChild(img);
+            row.appendChild(imageCell);
+            
+            // Type cell
+            const typeCell = document.createElement('td');
+            typeCell.textContent = movement.type;
+            typeCell.style.fontWeight = 'bold';
+            typeCell.style.textAlign = 'right';
+            typeCell.style.paddingRight = '15px';
+            row.appendChild(typeCell);
+            
+            // Description cell
+            const descCell = document.createElement('td');
+            descCell.textContent = movement.description;
+            descCell.style.textAlign = 'right';
+            descCell.style.paddingRight = '15px';
+            row.appendChild(descCell);
+            
+            // Score cells
+            movement.scores.forEach(score => {
+                const scoreCell = document.createElement('td');
+                scoreCell.textContent = score;
+                scoreCell.className = 'selectable-cell';
+                scoreCell.setAttribute('data-score', score);
+                scoreCell.setAttribute('data-group', 'movement-type');
+                row.appendChild(scoreCell);
+            });
+            
+            tbody.appendChild(row);
+        });
+    }
+
+    // ---------------------- Section Selection ----------------------
+    let selectedSection = 'A';
+
+    function handleSectionSelection(event) {
+        const section = event.currentTarget.getAttribute('data-section');
+        
+        document.querySelectorAll('.section-option').forEach(option => {
+            option.classList.remove('selected');
+        });
+        
+        event.currentTarget.classList.add('selected');
+        selectedSection = section;
+        
+        // Enable/disable sections
+        if (section === 'A') {
+            enableSection('A');
+            disableSection('B');
+            updateCalculationTable('A');
+        } else {
+            enableSection('B');
+            disableSection('A');
+            updateCalculationTable('B');
+        }
+        
+        calculateScores();
+    }
+
+    function enableSection(section) {
+        const sectionElement = document.getElementById(`section-${section.toLowerCase()}`);
+        sectionElement.classList.remove('disabled');
+        
+        sectionElement.querySelectorAll('.selectable-cell, .single-select-row').forEach(element => {
+            element.classList.remove('disabled');
+        });
+    }
+
+    function disableSection(section) {
+        const sectionElement = document.getElementById(`section-${section.toLowerCase()}`);
+        sectionElement.classList.add('disabled');
+        
+        sectionElement.querySelectorAll('.selectable-cell, .single-select-row').forEach(element => {
+            element.classList.remove('selected', 'selected-row');
+            element.classList.add('disabled');
+        });
+        
+        // Update scores
+        if (section === 'A') {
+            document.getElementById('sectionAScore').textContent = 'امتیاز بخش A: 0';
+        } else {
+            document.getElementById('sectionBScore').textContent = 'امتیاز بخش B: 0';
+        }
+    }
+
+    function updateCalculationTable(section) {
+        if (section === 'A') {
+            document.getElementById('calc-header-a').style.display = '';
+            document.getElementById('calc-header-b').style.display = 'none';
+            document.getElementById('calc-subheader-a').style.display = '';
+            document.getElementById('calc-subheader-b').style.display = 'none';
+            document.getElementById('calc-row-movement').style.display = '';
+            document.getElementById('calc-row-driving').style.display = 'none';
+            document.getElementById('calc-section-a').style.display = '';
+            document.getElementById('calc-section-b').style.display = 'none';
+            document.getElementById('calc-sum-a').style.display = '';
+            document.getElementById('calc-sum-b').style.display = 'none';
+            document.getElementById('final-score-a').style.display = '';
+            document.getElementById('final-score-b').style.display = 'none';
+        } else {
+            document.getElementById('calc-header-a').style.display = 'none';
+            document.getElementById('calc-header-b').style.display = '';
+            document.getElementById('calc-subheader-a').style.display = 'none';
+            document.getElementById('calc-subheader-b').style.display = '';
+            document.getElementById('calc-row-movement').style.display = 'none';
+            document.getElementById('calc-row-driving').style.display = '';
+            document.getElementById('calc-section-a').style.display = 'none';
+            document.getElementById('calc-section-b').style.display = '';
+            document.getElementById('calc-sum-a').style.display = 'none';
+            document.getElementById('calc-sum-b').style.display = '';
+            document.getElementById('final-score-a').style.display = 'none';
+            document.getElementById('final-score-b').style.display = '';
+        }
+    }
+
+    // ---------------------- Time Score Calculation ----------------------
+    const timeThresholds = [1, 5, 10, 20, 30, 45, 60, 100, 150, 210, 270, 360, 480];
+    const timeScores = [1, 1.5, 2, 2.5, 3, 3.5, 4, 5, 6, 7, 8, 9, 10];
+
+    function interp(x, xs, ys) {
+        if (x <= xs[0]) return ys[0];
+        for (let i = 1; i < xs.length; i++) {
+            if (x <= xs[i]) {
+                const r = (x - xs[i-1]) / (xs[i] - xs[i-1]);
+                return ys[i-1] + r * (ys[i] - ys[i-1]);
+            }
+        }
+        return ys[ys.length-1];
+    }
+
+    function calcTimeScore() {
+        let score = null;
+        const customInput = document.getElementById('timeCustom').value;
+        const customDuration = parseFloat(customInput);
+        
+        if (!isNaN(customDuration) && customDuration > 0) {
+            score = interp(customDuration, timeThresholds, timeScores);
+        } else {
+            const selectedCell = document.querySelector('.selectable-cell.selected[data-group="time"]');
+            if (selectedCell) {
+                score = parseFloat(selectedCell.dataset.score);
+            }
+        }
+        score = score === null ? 1 : score;
+        document.getElementById('timeScore').innerHTML = `امتیاز زمان: ${score.toFixed(1)}`;
+        return score;
+    }
+
+    // ---------------------- Cell Selection Logic ----------------------
+    function handleCellSelection(event) {
+        const cell = event.currentTarget;
+        const group = cell.getAttribute('data-group');
+        
+        if (cell.classList.contains('disabled')) return;
+
+        if (group === 'time') {
+            // Time selection
+            document.querySelectorAll('.selectable-cell[data-group="time"]').forEach(c => {
+                c.classList.remove('selected');
+            });
+            cell.classList.add('selected');
+            document.getElementById('timeCustom').value = '';
+        } else if (group === 'movement-type') {
+            // Movement type selection - single cell
+            document.querySelectorAll('.selectable-cell[data-group="movement-type"]').forEach(c => {
+                c.classList.remove('selected');
+            });
+            cell.classList.add('selected');
+        } else if (['load-center', 'posture-a', 'movement-speed', 'path-conditions'].includes(group)) {
+            // Single cell selection tables
+            document.querySelectorAll(`.selectable-cell[data-group="${group}"]`).forEach(c => {
+                c.classList.remove('selected');
+            });
+            cell.classList.add('selected');
+        }
+        
+        calculateScores();
+    }
+
+    // ---------------------- Row Selection Logic ----------------------
+    function handleRowSelection(event) {
+        const row = event.currentTarget;
+        const group = row.getAttribute('data-group');
+        
+        if (!group || row.classList.contains('disabled')) return;
+
+        if (group === 'unfavorable-a') {
+            // Special handling for unfavorable-a group (only one can be selected)
+            document.querySelectorAll('.single-select-row[data-group="unfavorable-a"]').forEach(r => {
+                r.classList.remove('selected-row');
+            });
+            row.classList.add('selected-row');
+        } else if (['unfavorable-a-weather', 'path-weather', 'task-variety'].includes(group)) {
+            // Single row selection for other groups
+            document.querySelectorAll(`.single-select-row[data-group="${group}"]`).forEach(r => {
+                r.classList.remove('selected-row');
+            });
+            row.classList.add('selected-row');
+        }
+        
+        calculateScores();
+    }
+
+    // ---------------------- Section A Score Calculation ----------------------
+    function calculateSectionAScore() {
+        if (selectedSection !== 'A') return 0;
+
+        let totalScore = 0;
+
+        // Movement type score
+        const selectedMovementCell = document.querySelector('.selectable-cell[data-group="movement-type"].selected');
+        if (selectedMovementCell) {
+            totalScore += parseFloat(selectedMovementCell.getAttribute('data-score'));
+        }
+
+        // Load center score
+        const selectedLoadCenterCell = document.querySelector('.selectable-cell[data-group="load-center"].selected');
+        if (selectedLoadCenterCell) {
+            totalScore += parseFloat(selectedLoadCenterCell.getAttribute('data-score'));
+        }
+
+        // Posture score
+        const selectedPostureCell = document.querySelector('.selectable-cell[data-group="posture-a"].selected');
+        if (selectedPostureCell) {
+            totalScore += parseFloat(selectedPostureCell.getAttribute('data-score'));
+        }
+
+        // Unfavorable conditions
+        const selectedUnfavorableMain = document.querySelector('.single-select-row[data-group="unfavorable-a"].selected-row');
+        if (selectedUnfavorableMain) {
+            totalScore += parseFloat(selectedUnfavorableMain.getAttribute('data-score'));
+        }
+
+        const selectedUnfavorableWeather = document.querySelector('.single-select-row[data-group="unfavorable-a-weather"].selected-row');
+        if (selectedUnfavorableWeather) {
+            totalScore += parseFloat(selectedUnfavorableWeather.getAttribute('data-score'));
+        }
+
+        document.getElementById('sectionAScore').innerHTML = `امتیاز بخش A: ${totalScore}`;
+        return totalScore;
+    }
+
+    // ---------------------- Section B Score Calculation ----------------------
+    function calculateSectionBScore() {
+        if (selectedSection !== 'B') return 0;
+
+        let totalScore = 0;
+
+        // Movement speed score
+        const selectedMovementSpeedCell = document.querySelector('.selectable-cell[data-group="movement-speed"].selected');
+        if (selectedMovementSpeedCell) {
+            totalScore += parseFloat(selectedMovementSpeedCell.getAttribute('data-score'));
+        }
+
+        // Path conditions
+        const selectedPathConditionsCell = document.querySelector('.selectable-cell[data-group="path-conditions"].selected');
+        if (selectedPathConditionsCell) {
+            totalScore += parseFloat(selectedPathConditionsCell.getAttribute('data-score'));
+        }
+
+        // Path weather
+        const selectedPathWeather = document.querySelector('.single-select-row[data-group="path-weather"].selected-row');
+        if (selectedPathWeather) {
+            totalScore += parseFloat(selectedPathWeather.getAttribute('data-score'));
+        }
+
+        document.getElementById('sectionBScore').innerHTML = `امتیاز بخش B: ${totalScore}`;
+        return totalScore;
+    }
+
+    // ---------------------- Task Variety Score ----------------------
+    function calculateTaskVarietyScore() {
+        const selectedVariety = document.querySelector('.single-select-row[data-group="task-variety"].selected-row');
+        const score = selectedVariety ? parseFloat(selectedVariety.getAttribute('data-score')) : 0;
+        document.getElementById('taskVarietyScore').textContent = `امتیاز تنوع و تکرار وظایف: ${score}`;
+        return score;
+    }
+
+    // ---------------------- Risk Assessment ----------------------
+    function updateRiskTable(finalScoreMax) {
+        document.querySelectorAll('#riskTable tbody tr').forEach(row => {
+            row.classList.remove('current-risk-level', 'risk-row-1', 'risk-row-2', 'risk-row-3', 'risk-row-4');
+            
+            let isInRange = false;
+            let colorClass = '';
+
+            if (row.id === 'risk-row-1' && finalScoreMax < 20) {
+                 isInRange = true;
+                 colorClass = 'risk-row-1';
+            } else if (row.id === 'risk-row-2' && finalScoreMax >= 20 && finalScoreMax < 50) {
+                 isInRange = true;
+                 colorClass = 'risk-row-2';
+            } else if (row.id === 'risk-row-3' && finalScoreMax >= 50 && finalScoreMax < 100) {
+                 isInRange = true;
+                 colorClass = 'risk-row-3';
+            } else if (row.id === 'risk-row-4' && finalScoreMax >= 100) {
+                 isInRange = true;
+                 colorClass = 'risk-row-4';
+            }
+            
+            if (isInRange) {
+                row.classList.add('current-risk-level');
+                row.classList.add(colorClass);
+            }
+        });
+    }
+
+    // ---------------------- Main Calculation Function ----------------------
+    function calculateScores() {
+        const timeScore = calcTimeScore();
+        
+        const sectionAScore = calculateSectionAScore();
+        const sectionBScore = calculateSectionBScore();
+        const varietyScore = calculateTaskVarietyScore();
+        
+        let finalScore = 0;
+        
+        if (selectedSection === 'A') {
+            const sumA = sectionAScore + varietyScore;
+            const finalScoreA = sumA * timeScore;
+            finalScore = finalScoreA;
+
+            document.getElementById('calc-section-a').textContent = sectionAScore > 0 ? sectionAScore.toFixed(1) : '—';
+            document.getElementById('calc-variety-merged').textContent = varietyScore.toFixed(1);
+            document.getElementById('calc-sum-a').textContent = sumA > 0 ? sumA.toFixed(1) : '—';
+            document.getElementById('final-score-a').textContent = finalScoreA > 0 ? finalScoreA.toFixed(1) : '—';
+        } else if (selectedSection === 'B') {
+            const sumB = sectionBScore + varietyScore;
+            const finalScoreB = sumB * timeScore;
+            finalScore = finalScoreB;
+
+            document.getElementById('calc-section-b').textContent = sectionBScore > 0 ? sectionBScore.toFixed(1) : '—';
+            document.getElementById('calc-variety-merged').textContent = varietyScore.toFixed(1);
+            document.getElementById('calc-sum-b').textContent = sumB > 0 ? sumB.toFixed(1) : '—';
+            document.getElementById('final-score-b').textContent = finalScoreB > 0 ? finalScoreB.toFixed(1) : '—';
+        }
+        
+        document.getElementById('final-time-merged').textContent = timeScore.toFixed(1);
+        
+        // Apply female coefficient if checked
+        const isFemale = document.getElementById('femaleWorker').checked;
+        if (isFemale) {
+            finalScore *= 1.3;
+        }
+        
+        document.getElementById('final-max-score-value').textContent = finalScore.toFixed(1);
+        updateRiskTable(finalScore);
+    }
+
+    // ---------------------- Gender Checkbox ----------------------
+    function handleGenderChange() {
+        calculateScores();
+    }
+
+    // ---------------------- Print Function ----------------------
+    function handlePrint() {
+        window.print();
+    }
+
+    // ---------------------- Reset Function ----------------------
+    function resetForm() {
+        // Clear all selections
+        document.querySelectorAll('.selectable-cell, .single-select-row').forEach(element => {
+            element.classList.remove('selected', 'selected-row');
+        });
+
+        // Reset time
+        document.getElementById('timeCustom').value = '';
+        const defaultTimeCell = document.querySelector('.selectable-cell[data-group="time"][data-score="1"]');
+        if (defaultTimeCell) defaultTimeCell.classList.add('selected');
+
+        // Reset section selection
+        document.querySelectorAll('.section-option').forEach(option => {
+            option.classList.remove('selected');
+        });
+        document.querySelector('.section-option[data-section="A"]').classList.add('selected');
+        selectedSection = 'A';
+
+        // Reset checkbox
+        document.getElementById('femaleWorker').checked = false;
+
+        // Reset metadata
+        document.getElementById('location').value = '';
+        document.getElementById('evaluator').value = '';
+        document.getElementById('workDuration').value = '';
+        document.getElementById('subtaskDuration').value = '';
+        document.getElementById('assessmentDate').value = '';
+
+        // Reset risk table
+        document.querySelectorAll('#riskTable tbody tr').forEach(row => {
+            row.classList.remove('current-risk-level', 'risk-row-1', 'risk-row-2', 'risk-row-3', 'risk-row-4');
+        });
+
+        // Enable both sections and set to section A
+        enableSection('A');
+        enableSection('B');
+        updateCalculationTable('A');
+
+        calculateScores();
+    }
+
+    // ---------------------- Initialization ----------------------
+    function init() {
+        initializeMovementTable();
+        
+        // Add event listeners to all selectable cells
+        document.querySelectorAll('.selectable-cell').forEach(cell => {
+            cell.addEventListener('click', handleCellSelection);
+        });
+        
+        // Add event listeners to all selectable rows
+        document.querySelectorAll('.single-select-row').forEach(row => {
+            row.addEventListener('click', handleRowSelection);
+        });
+        
+        // Add event listener to custom time input
+        document.getElementById('timeCustom').addEventListener('input', calculateScores);
+        
+        // Add event listeners to section options
+        document.querySelectorAll('.section-option').forEach(option => {
+            option.addEventListener('click', handleSectionSelection);
+        });
+
+        // Add event listener to female worker checkbox
+        document.getElementById('femaleWorker').addEventListener('change', handleGenderChange);
+
+        // Add event listeners to buttons
+        document.getElementById('resetForm').addEventListener('click', resetForm);
+        document.getElementById('printButton').addEventListener('click', handlePrint);
+
+        // Initialize form
+        resetForm();
+    }
+
+    document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
