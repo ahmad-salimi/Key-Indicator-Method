@@ -1,0 +1,1547 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="utf-8" />
+    <title>ابزار KIM-MHO (حرکت دست و بازو)</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css">
+    <style>
+        /* ---------------------- CSS Variables (Soft & Refined Theme) ---------------------- */
+        :root {
+            --primary-color: #007bff; /* Soft Blue */
+            --secondary-color: #6c757d; /* Gray */
+            --bg-color: #f8f9fa; /* Very Light Gray */
+            --card-bg: #ffffff;
+            --card-border: #e9ecef;
+            --text-color: #212529;
+            --spacing: 16px;
+            --border-radius: 8px; /* Slightly rounder */
+            --table-header-bg: #e9ecef; /* Light gray for headers */
+            --color-right-hand: #dc3545; /* Red border */
+            --color-left-hand: #007bff; /* Blue border */
+            --bg-right-hand: #ffeaea; /* Light red background */
+            --bg-left-hand: #e9f5ff; /* Light blue background - Used for selection */
+        }
+
+        /* ---------------------- Base Styles ---------------------- */
+        body {
+            font-family: Vazirmatn, Tahoma, sans-serif;
+            direction: rtl;
+            text-align: right;
+            max-width: 1100px; 
+            margin: 24px auto;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            padding: 0 var(--spacing);
+            line-height: 1.6;
+        }
+        h1 { 
+            text-align: center; 
+            color: var(--primary-color);
+            font-size: 2rem;
+        }
+        h2 { 
+            text-align: right; 
+            font-size: 1.6rem; 
+            color: var(--primary-color); 
+            border-bottom: 2px solid var(--primary-color); 
+            padding-bottom: 5px; 
+            margin-top: 30px; 
+        }
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: var(--border-radius);
+            padding: var(--spacing);
+            margin-bottom: 24px; 
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08); 
+        }
+        .score-box {
+            font-weight: bold;
+            font-size: 1.3em;
+            margin-top: 16px;
+            padding: 15px;
+            background-color: #e9f5ff; 
+            border: 2px solid #cce5ff; 
+            border-radius: var(--border-radius);
+            text-align: center;
+            color: var(--primary-color);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+        
+        /* ---------------------- Interactive Styles ---------------------- */
+        .selectable-cell, 
+        .force-score-table tbody td[data-score], 
+        .force-score-table tbody td[data-extrap-cell],
+        .single-select-row-table tbody tr.single-select-row { 
+            cursor: pointer;
+            transition: background-color 0.2s; 
+        }
+        
+        /* Hover for all selectable elements */
+        .selectable-cell:hover:not(.selected),
+        .force-score-table tbody td[data-score]:hover:not(.selected-right):not(.selected-left):not(.selected-both),
+        .force-score-table tbody td[data-extrap-cell]:hover:not(.selected-right):not(.selected-left):not(.selected-both),
+        .single-select-row-table tbody tr.single-select-row:hover:not(.selected-row) { 
+             background-color: #f3f3f3 !important; 
+        }
+
+        /* Style for selected cells in Step 1 */
+        .selectable-cell.selected {
+            background-color: var(--bg-left-hand) !important; 
+            box-shadow: 0 0 0 3px var(--primary-color) inset; 
+            font-weight: bold;
+            color: var(--text-color);
+        }
+        
+        /* --- Style for selected rows in Step 3, 4, 5, 6, 7 (MATCHING Step 1) --- */
+        .single-select-row-table tbody tr.selected-row {
+            /* Reset TR specific styles that conflict with TD selection look */
+            background-color: transparent !important; 
+            box-shadow: none !important; 
+            font-weight: normal;
+        }
+
+        .single-select-row-table tbody tr.selected-row td {
+            /* Apply the exact Step 1 selection style to ALL cells in the selected row */
+            background-color: var(--bg-left-hand) !important; 
+            box-shadow: 0 0 0 3px var(--primary-color) inset; 
+            font-weight: bold;
+            color: var(--text-color);
+        }
+        /* Ensure tooltip content is visible in selected state */
+        .single-select-row-table tbody tr.selected-row td .tooltip-text {
+            color: #fff; /* Keep tooltip text readable */
+        }
+
+
+        /* Input/Form Styles */
+        .custom-input { display: flex; align-items: center; margin-top: 10px; }
+        .custom-input input { direction: ltr; padding: 8px 10px; border-radius: 4px; border: 1px solid #ced4da; }
+
+        /* ---------------------- General Table Styles (Border Fix) ---------------------- */
+        .score-table, .force-score-table, .single-select-row-table { 
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+            margin-top: 15px;
+        }
+        .score-table th, .score-table td,
+        .force-score-table th, .force-score-table td,
+        .single-select-row-table th, .single-select-row-table td { 
+            border: 1px solid #a9a9a9; 
+            padding: 8px 3px;
+            text-align: center;
+            vertical-align: middle;
+            background-color: #ffffff;
+            direction: ltr; 
+        }
+        .score-table thead th, .force-score-table thead th, .single-select-row-table thead th { 
+            direction: rtl; 
+            background-color: var(--table-header-bg); 
+            font-weight: bold;
+            color: var(--text-color);
+        }
+        
+        /* Styles specific to Step 1 table headers (Width Reduced) */
+        .score-table thead .label-cell {
+            width: 250px; 
+            min-width: 250px;
+        }
+
+        /* Specific Styles for the single-select table (Step 3, 4, 5, 6, 7) */
+        /* Score Column (Visual Left) */
+        .single-select-row-table thead th:last-child { 
+            width: 80px; 
+        }
+        .single-select-row-table tbody td:last-child { 
+            width: 80px; 
+            min-width: 80px; 
+            font-weight: bold;
+            font-size: 1.1em;
+            background-color: #f9f9f9; /* Default gray background */
+            text-align: center;
+            direction: ltr; 
+        }
+        /* Description Column (Visual Right) */
+        .single-select-row-table tbody td:nth-last-child(2) { 
+            text-align: right;
+            padding-right: 15px;
+            direction: rtl;
+            width: auto;
+        }
+        /* Image Cell (Step 4 only) - WIDTH HALVED, HEIGHT SLIGHTLY INCREASED, WHITE BG */
+        .posture-image-cell {
+            background-color: #ffffff !important; 
+            font-size: 0.75rem;
+            color: var(--secondary-color);
+            width: 50px; /* Halved from 100px */
+            min-width: 50px; /* Ensure minimum width */
+            padding: 6px 2px; /* Increased top/bottom padding for "25% height increase feel" */
+        }
+        .posture-image-cell img {
+             width: 100%; 
+             height: auto; 
+             display: block; 
+             max-width: 40px; /* Reduced to fit the new 50px cell width better */
+             margin: 0 auto;
+        }
+        /* Styling for the explanation row (Step 5) */
+        .unselectable-explanation-row td {
+            background-color: var(--card-bg) !important; 
+            font-size: 0.8em;
+            color: var(--secondary-color);
+            padding: 5px 15px !important;
+            border-bottom: none !important;
+        }
+        .unselectable-explanation-row td:last-child {
+            background-color: var(--card-bg) !important;
+        }
+
+
+        /* ---------------------- Tooltip Styles ---------------------- */
+        .tooltip-container {
+            position: relative;
+            display: inline-block;
+            cursor: help; 
+            /* Added for h2 styling */
+            color: inherit;
+        }
+        .tooltip-text {
+            visibility: hidden;
+            width: 250px;
+            background-color: #343a40;
+            color: #fff;
+            text-align: right;
+            border-radius: 4px;
+            padding: 8px;
+            position: absolute;
+            z-index: 10;
+            bottom: 100%; 
+            right: 50%;
+            margin-right: -125px; 
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 0.85em; /* **NEW: Smaller font size** */
+            direction: rtl;
+            line-height: 1.5;
+            white-space: normal; /* Allow text wrapping */
+        }
+        .tooltip-container:hover .tooltip-text {
+            visibility: visible;
+            opacity: 1;
+        }
+        .tooltip-text::after {
+            content: " ";
+            position: absolute;
+            top: 100%; 
+            right: 50%;
+            margin-right: -5px;
+            border-width: 5px;
+            border-style: solid;
+            border-color: #343a40 transparent transparent transparent;
+        }
+        /* Style for tooltip inside the right-aligned description cell */
+        .single-select-row-table tbody td:nth-last-child(2) .tooltip-container {
+            font-weight: bold; /* Make the trigger text stand out */
+            color: var(--primary-color);
+            border-bottom: 1px dotted var(--primary-color);
+        }
+        /* Style for tooltip inside the score cell */
+        .single-select-row-table tbody td:last-child .tooltip-container {
+            color: inherit;
+            border-bottom: 1px dotted var(--text-color);
+            display: block; /* Ensure it wraps the whole number */
+            height: 100%;
+            width: 100%;
+        }
+
+
+        /* ---------------------- Complex Force Table Styles (Step 2) ---------------------- */
+        .force-table-container { overflow-x: auto; margin-bottom: 10px; }
+        .force-score-table { table-layout: fixed; } 
+        
+        .force-level-merged-cell {
+            direction: rtl !important;
+            text-align: center !important;
+            width: 120px; 
+            min-width: 120px;
+            background-color: #ffffff !important; 
+        }
+        
+        .force-desc-cell { 
+            direction: rtl !important; 
+            text-align: right !important; 
+            width: 30%; 
+            padding-right: 8px; 
+            word-break: break-word; 
+        }
+        .force-desc-cell b { 
+            font-weight: bold;
+            color: var(--text-color); 
+        }
+
+        /* Selection Styles for Step 2 */
+        .force-score-table td.selected-right {
+            background-color: var(--bg-right-hand) !important; 
+            border: 2px solid var(--color-right-hand) !important; 
+            font-weight: bold;
+        }
+        .force-score-table td.selected-left {
+            background-color: var(--bg-left-hand) !important; 
+            border: 2px solid var(--color-left-hand) !important; 
+            font-weight: bold;
+        }
+
+        /* Split Highlight for both hands */
+        .force-score-table td.selected-both {
+            background: linear-gradient(to left, var(--bg-left-hand) 50%, var(--bg-right-hand) 50%) !important;
+            border: 2px solid #000000 !important; 
+            font-weight: bold;
+            box-shadow: inset 2px 0 0 0 var(--color-left-hand), 
+                        inset -2px 0 0 0 var(--color-right-hand), 
+                        inset 0 0 0 1000px rgba(0,0,0,0); 
+        }
+        .force-score-table td.selected-both.selected-right,
+        .force-score-table td.selected-both.selected-left {
+            border: 2px solid #000000 !important;
+        }
+
+        /* Style for the DDD Header Input */
+        #extrapHeaderDDD {
+            width: 100%;
+            padding: 5px 2px;
+            border: none;
+            background-color: #fffacd; 
+            font-weight: bold;
+            text-align: center;
+            box-sizing: border-box;
+            direction: ltr;
+        }
+        
+        /* Summary table styles */
+        .force-results-subtable { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        .force-results-subtable th, .force-results-subtable td { 
+            border: 1px solid #a9a9a9; 
+            text-align: center; 
+            padding: 5px; 
+            direction: rtl; 
+        }
+        .force-results-subtable th { background-color: var(--table-header-bg); }
+        .force-results-subtable .force-result-box {
+            background-color: var(--bg-color); 
+            border: 2px solid var(--primary-color);
+            font-weight: bold;
+            padding: 8px;
+            border-radius: 4px;
+            min-height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        /* **NEW: Red border for Right Hand Score Box** */
+        #force-score-right {
+             border: 2px solid var(--color-right-hand) !important;
+        }
+
+        /* ---------------------- Final Calculation Table Styles ---------------------- */
+        .final-calc-table { 
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+            margin-top: 15px;
+        }
+        .final-calc-table th, .final-calc-table td {
+            border: 1px solid #a9a9a9; 
+            padding: 10px 5px;
+            text-align: center;
+            vertical-align: middle;
+            direction: rtl; 
+        }
+        .final-calc-table thead th {
+            background-color: var(--table-header-bg); 
+            font-weight: bold;
+        }
+        .final-calc-table tbody th {
+            text-align: right;
+            padding-right: 15px;
+            background-color: #f5f5f5;
+            width: 40%;
+        }
+        .final-score-row th, .final-score-row td {
+            font-size: 1.2em;
+            font-weight: bold;
+            background-color: #fffacd !important;
+        }
+        .final-score-cell {
+            min-width: 100px;
+        }
+        /* Merged cells for single scores */
+        .final-calc-table .merged-cell-score {
+            background-color: #e9ecef !important; /* Light gray for merged cells */
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+        .final-calc-table .sub-total-row th,
+        .final-calc-table .sub-total-row td {
+            background-color: #e6f7ff !important; 
+            font-weight: bold;
+        }
+
+        /* ************************************************* */
+        /* ******** NEW: Max Final Score Display Style ******** */
+        /* ************************************************* */
+        #finalMaxScoreDisplay {
+            margin-top: 25px;
+            padding: 20px;
+            /* Match the requested light blue background from the image */
+            background-color: #e9f5ff; 
+            border: 2px solid var(--primary-color);
+            border-radius: 8px;
+            text-align: center;
+            font-size: 1.6rem;
+            font-weight: bold;
+            color: var(--primary-color); /* Match requested blue font for main text */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        #finalMaxScoreDisplay #final-max-score-value {
+            /* Match requested blue font for the score value */
+            color: var(--primary-color); 
+            font-size: 1.2em;
+            margin-right: 10px;
+        }
+
+
+        /* ---------------------- Risk Assessment Table Styles (Reverse Gradient) ---------------------- */
+        .risk-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            font-size: 0.9rem;
+        }
+        .risk-table th, .risk-table td {
+            border: 1px solid #a9a9a9;
+            padding: 10px 8px;
+            text-align: right;
+            vertical-align: top;
+            direction: rtl; 
+        }
+        .risk-table thead th {
+            background-color: var(--table-header-bg);
+            font-weight: bold;
+            text-align: center;
+            /* New: Adjusting widths for the new columns */
+            width: 15%; 
+        }
+        .risk-table thead th:nth-child(2) { width: 15%; } /* سطح ریسک */
+        .risk-table thead th:nth-child(3) { width: 10%; } /* شدت بار */
+        .risk-table thead th:nth-child(4) { width: 45%; } /* پیامدها */
+        .risk-table thead th:nth-child(5) { width: 15%; } /* اقدامات */
+
+        .risk-table tbody td:first-child, /* ریسک */
+        .risk-table tbody td:nth-child(2), /* سطح ریسک */
+        .risk-table tbody td:nth-child(3) { /* شدت بار */
+            text-align: center;
+            font-weight: bold;
+        }
+        .risk-table tbody td:nth-child(5) { /* اقدامات */
+            text-align: justify;
+        }
+        
+        /* ************************************************* */
+        /* ********* NEW: Custom Risk Color Palette ********* */
+        /* ************************************************* */
+        .risk-row-1 { background-color: #00E64D !important; color: #155724 !important; } /* Green */
+        .risk-row-2 { background-color: #FFFF66 !important; color: #856404 !important; } /* Yellow */
+        .risk-row-3 { background-color: #FF9933 !important; color: #7f552e !important; } /* Orange */
+        .risk-row-4 { background-color: #FF3333 !important; color: #721c24 !important; } /* Red */
+
+        /* Style for the current risk level row */
+        .risk-table tbody tr.current-risk-level {
+            box-shadow: 0 0 0 4px #000000 inset; 
+        }
+
+        /* Styling for the new risk table content */
+        .risk-table .consequence-action-cell {
+            text-align: right;
+            line-height: 1.6;
+        }
+        .risk-table .consequence-action-cell strong {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: inherit;
+        }
+        /* ---------------------- Print Styles ---------------------- */
+        @media print {
+            @page {
+                size: A4 portrait;
+                margin: 1.5cm; /* Adjusted margin for better fit */
+            }
+            body { 
+                padding: 0; 
+                margin: 0;
+                font-size: 9pt; /* Set a base font size for printing */
+                -webkit-print-color-adjust: exact !important;
+                color-adjust: exact !important;
+            }
+            body > *:not(#step8-card) {
+                display: none !important;
+            }
+            #printButton, .reset-container {
+                display: none !important;
+            }
+            #step8-card {
+                display: block !important;
+                width: 100% !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                box-shadow: none !important;
+                border: none !important;
+                page-break-inside: avoid;
+            }
+            
+            /* Aggressive shrinking and layout fixes */
+            #step8-card h2 { font-size: 14pt; margin: 10px 0 5px 0; }
+            #step8-card h3 { font-size: 11pt; margin: 8px 0 4px 0; }
+
+            .final-calc-table, .risk-table {
+                width: 100% !important;
+                table-layout: fixed; /* Crucial for controlling width */
+                font-size: 7.5pt !important;
+                line-height: 1.2;
+                border-spacing: 0;
+                border-collapse: collapse;
+            }
+
+            .final-calc-table th, .final-calc-table td,
+            .risk-table th, .risk-table td {
+                padding: 3px 2px !important;
+                word-wrap: break-word; /* Force long text to wrap */
+                text-align: center;
+            }
+             .final-calc-table tbody th { text-align: right !important; }
+            
+            /* Specific column widths for the risk table to prevent overflow */
+            .risk-table th:nth-child(1) { width: 6%; }  /* ریسک */
+            .risk-table th:nth-child(2) { width: 14%; } /* سطح ریسک */
+            .risk-table th:nth-child(3) { width: 10%; } /* شدت بار */
+            .risk-table th:nth-child(4) { width: 45%; } /* پیامدها */
+            .risk-table th:nth-child(5) { width: 25%; } /* اقدامات */
+            .risk-table td:nth-child(4), .risk-table td:nth-child(5) {
+                text-align: right !important; /* Keep text alignment for description cells */
+            }
+
+            #finalMaxScoreDisplay {
+                font-size: 11pt !important;
+                padding: 6px !important;
+                margin: 8px 0 !important;
+            }
+
+            /* --- Color preservation --- */
+            .risk-table tbody tr, 
+            .final-score-row th, .final-score-row td, 
+            #finalMaxScoreDisplay, 
+            .final-calc-table .merged-cell-score,
+            .final-calc-table .sub-total-row th,
+            .final-calc-table .sub-total-row td,
+            .risk-row-1, .risk-row-2, .risk-row-3, .risk-row-4,
+            .risk-table tbody tr.current-risk-level {
+                -webkit-print-color-adjust: exact !important;
+                color-adjust: exact !important;
+            }
+            
+            .risk-row-1 { background-color: #00E64D !important; color: #155724 !important; }
+            .risk-row-2 { background-color: #FFFF66 !important; color: #856404 !important; }
+            .risk-row-3 { background-color: #FF9933 !important; color: #7f552e !important; }
+            .risk-row-4 { background-color: #FF3333 !important; color: #721c24 !important; }
+            .risk-table tbody tr.current-risk-level { box-shadow: 0 0 0 3px #000000 inset !important; }
+        }
+    </style>
+</head>
+<body>
+
+    <h1>ابزار KIM-MHO (حرکت دست و بازو)</h1>
+    
+    <div class="reset-container" style="text-align: right; margin-bottom: 20px;">
+        <button id="resetForm" style="padding: 10px 20px; font-weight: bold; border-radius: 4px; border: 1px solid var(--primary-color); background-color: var(--card-bg); color: var(--primary-color); cursor: pointer; font-family: Vazirmatn, Tahoma, sans-serif;">
+            بازنشانی فرم
+        </button>
+    </div>
+
+    <div class="card" id="step1">
+        <h2>گام ۱: تعیین امتیاز زمان</h2>
+        
+        <p>لطفاً مدت زمان کل این فعالیت فرعی را در هر روز کاری مشخص کنید.</p>
+
+        <div class="force-table-container">
+            <table class="score-table">
+                <thead>
+                    <tr>
+                        <th class="label-cell">کل مدت این فعالیت فرعی در هر روز کاری [تا ... ساعت]</th>
+                        <th>1 ></th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th>8</th><th>9</th><th>10</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="label-cell">امتیاز زمان</td>
+                        <td data-score="1" class="selectable-cell single-select" data-group="time1">1</td>
+                        <td data-score="2" class="selectable-cell single-select" data-group="time1">2</td>
+                        <td data-score="3" class="selectable-cell single-select" data-group="time1">3</td>
+                        <td data-score="4" class="selectable-cell single-select" data-group="time1">4</td>
+                        <td data-score="5" class="selectable-cell single-select" data-group="time1">5</td>
+                        <td data-score="6" class="selectable-cell single-select" data-group="time1">6</td>
+                        <td data-score="7" class="selectable-cell single-select" data-group="time1">7</td>
+                        <td data-score="8" class="selectable-cell single-select" data-group="time1">8</td>
+                        <td data-score="9" class="selectable-cell single-select" data-group="time1">9</td>
+                        <td data-score="10" class="selectable-cell single-select" data-group="time1">10</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="custom-input">
+            <label for="timeCustom">یا وارد کردن مدت زمان دلخواه (ساعت) برای درون‌یابی:</label>
+            <input id="timeCustom" type="number" min="0.1" max="10" step="0.1" placeholder="مثلاً 3.5">
+            <span style="font-size: 0.85rem; margin-right: 15px; color: var(--text-color);"> (امتیاز زمان = مدت زمان، حداکثر تا 10)</span>
+        </div>
+        
+        <div class="score-box" id="timeScore">امتیاز زمان: 1.0</div>
+    </div>
+    
+    <div class="card" id="step2">
+        <h2>گام ۲: تعیین امتیاز اعمال نیرو</h2>
+
+        <div class="hand-selection-mode">
+            <strong style="margin-left: 20px;">انتخاب امتیاز برای:</strong>
+            <label style="margin-left: 20px;">
+                <input type="radio" name="handMode" value="right" checked id="handModeRight">
+                دست راست (قرمز کم رنگ)
+            </label>
+            <label>
+                <input type="radio" name="handMode" value="left" id="handModeLeft">
+                دست چپ (آبی کم رنگ)
+            </label>
+        </div>
+
+        <div class="force-table-container">
+            <table class="force-score-table">
+                <thead>
+                    <tr>
+                        <th rowspan="4" class="force-level-header" style="width: 120px;">سطح/تصویر</th>
+                        <th rowspan="4" class="force-desc-header" style="width: 30%;">توضیحات، مثال‌های معمول</th>
+                        <th colspan="4" style="direction: rtl;">
+                            <span class="tooltip-container">
+                                نگه داشتن ۱
+                                <span class="tooltip-text">زمان نگه داشتن بازو باید حداقل ۴ ثانیه باشد.</span>
+                            </span>
+                        </th>
+                        <th colspan="5" style="direction: rtl;">حرکت</th>
+                    </tr>
+                    <tr>
+                        <th colspan="4" style="direction: rtl;">مدت زمان نگه داشتن متوسط [ثانیه در دقیقه]</th>
+                        <th colspan="5" style="direction: rtl;">دفعات حرکت متوسط [تعداد در دقیقه]</th>
+                    </tr>
+                    <tr>
+                        <th>31-60</th><th>16-30</th><th>15 ≥</th><th>5 ></th>
+                        <th>5-15</th><th>16-30</th><th>31-60</th>
+                        <th>
+                            <span class="tooltip-container">
+                                61-90
+                                <span class="tooltip-text">در صورت تجاوز از مقادیر جدول، برون‌یابی خطی انجام شود.</span>
+                            </span>
+                        </th>
+                        <th>برون یابی</th>
+                    </tr>
+                    <tr>
+                        <th colspan="4">امتیاز اعمال نیرو</th>
+                        <th colspan="4">امتیاز اعمال نیرو</th>
+                        <th>
+                             <input type="number" id="extrapHeaderDDD" min="90" step="0.5" placeholder="> 90">
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="force-level-merged-cell" rowspan="6">
+                            <span class="level-text">سطوح اعمال نیرو (KIM-MHO)</span>
+                            <img src="images/kim-mho-force-levels.png" alt="سطوح اعمال نیرو" style="width: 100%; max-width: 100px; margin: 10px auto; display: block;">
+                        </td>
+                        <td class="force-desc-cell" data-row-index="0"><b>نیروهای بسیار کم یا کم (تا 15% FmaxM)</b> مانند زدن دکمه،  جابه‌جایی، سفارش‌دهی، هدایت مواد، قرار دادن قطعات کوچک (در محل معین)</td>
+                        <td data-score>5.5</td><td data-score>3</td><td data-score>1.5</td><td data-score>0.5</td>
+                        <td data-score>1</td><td data-score>2.5</td><td data-score>5</td><td data-score>7</td>
+                        <td data-extrap-cell data-calculated-score=""></td>
+                    </tr>
+                    <tr>
+                        <td class="force-desc-cell" data-row-index="1"><b>نیروهای متوسط (تا 30% FmaxM)</b> مانند گرفتن، اتصال قطعات کوچک با دست یا با ابزارهای کوچک</td>
+                        <td data-score>9</td><td data-score>4.5</td><td data-score>2.5</td><td data-score>0.5</td>
+                        <td data-score>2</td><td data-score>4</td><td data-score>7.5</td><td data-score>11</td>
+                        <td data-extrap-cell data-calculated-score=""></td>
+                    </tr>
+                    <tr>
+                        <td class="force-desc-cell" data-row-index="2"><b>نیروهای زیاد (تا 50% FmaxM)</b> مانند چرخاندن، پیچیدن، بسته‌بندی، گرفتن، نگه داشتن یا اتصال قطعات، فشار دادن، برش، کار با ماشین‌های دستی کوچک</td>
+                        <td data-score>14</td><td data-score>7</td><td data-score>3.5</td><td data-score>1</td>
+                        <td data-score>3</td><td data-score>6</td><td data-score>12</td><td data-score>18</td>
+                        <td data-extrap-cell data-calculated-score=""></td>
+                    </tr>
+                    <tr>
+                        <td class="force-desc-cell" data-row-index="3"><b>نیروهای بسیار زیاد (تا 80% FmaxM)</b> برشکاری نیازمند نیروی زیاد، کار با منگنه‌کوب، جابه‌جایی یا نگه داشتن قطعات یا ابزارها</td>
+                        <td data-score>22</td><td data-score>11</td><td data-score>5.5</td><td data-score>1.5</td>
+                        <td data-score>5</td><td data-score>10</td><td data-score>19</td><td data-score>100</td>
+                        <td data-extrap-cell data-calculated-score=""></td>
+                    </tr>
+                    <tr>
+                        <td class="force-desc-cell" data-row-index="4"><b>نیروهای قله (بیش از 80% FmaxM)</b> مانند سفت کردن یا شل کردن پیچ‌ها، جدا کردن یا فشار دادن قطعات</td>
+                        <td data-score>100</td><td data-score>100</td><td data-score>35</td><td data-score>8</td>
+                        <td data-score>30</td><td data-score>100</td><td data-score>100</td><td data-score>100</td>
+                        <td data-extrap-cell data-calculated-score=""></td>
+                    </tr>
+                    <tr>
+                        <td class="force-desc-cell" data-row-index="5">
+                            <span class="tooltip-container">
+                                <b>محکم ضربه زدن</b> با انگشت شست، کف دست یا مشت
+                                <span class="tooltip-text">این دسته فعالیت‌ها باید با KIM-BF هم بررسی شوند.</span>
+                            </span>
+                        </td>
+                        <td data-score>100</td><td data-score>100</td><td data-score>100</td><td data-score>8</td>
+                        <td data-score>30</td><td data-score>100</td><td data-score>100</td><td data-score>100</td>
+                        <td data-extrap-cell data-calculated-score=""></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="force-summary-container">
+            <table class="summary-table">
+                <tbody>
+                    <tr>
+                        <td style="font-weight: bold; width: 60%; vertical-align: top; padding-top: 10px; border-right: none;">
+                            چرخه کاری باید به دقت مشاهده شده و امتیاز برای هر دسته از نیروها مشخص شود. این امتیازها برای دست چپ و راست به طور جداگانه محاسبه شده و امتیاز اعمال نیرو را تشکیل می‌دهند.
+                        </td>
+                        <td style="width: 40%; padding: 0;">
+                            <table class="force-results-subtable">
+                                <thead>
+                                    <tr>
+                                        <th colspan="2" style="border-top: none;">امتیاز اعمال نیرو: چپ/راست</th>
+                                    </tr>
+                                    <tr>
+                                        <th style="width: 50%;">دست راست</th>
+                                        <th style="width: 50%;">دست چپ</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><div id="force-score-right" class="force-result-box">—</div></td>
+                                        <td><div id="force-score-left" class="force-result-box">—</div></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+    </div>
+
+    <div class="card" id="step3">
+        <h2>گام ۳: تعیین امتیاز شرایط انتقال/اعمال نیرو و چنگش</h2>
+
+        <table class="single-select-row-table">
+            <thead>
+                <tr>
+                    <th>تعیین امتیاز شرایط انتقال/اعمال نیرو / چنگش</th>
+                    <th style="width: 80px;">امتیاز</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr data-score="0" class="single-select-row" data-group="force-condition">
+                    <td>انتقال/اعمال نیروی بهینه/ اجزای کار به راحتی توسط دست گرفته می شوند (مثلاً شکل میله‌ای، دارای شیارهایی برای گرفتن در دست)/طراحی ارگونومیک خوب برای چنگش مطلوب (دسته‌ها، دکمه‌ها، ابزارها)</td>
+                    <td>0</td>
+                </tr>
+                <tr data-score="2" class="single-select-row" data-group="force-condition">
+                    <td>انتقال/اعمال نیروی محدود/ نیروی بیشتری جهت نگه داشتن (اجزای کار) مورد نیاز است/دستگیره وجود ندارد</td>
+                    <td>2</td>
+                </tr>
+                <tr data-score="4" class="single-select-row" data-group="force-condition">
+                    <td>انتقال/اعمال نیرو به شدت مختل/ اجزای کار به سختی قابل چنگش هستند (لغزنده، نرم، لبه‌های تیز)/دسته‌های نامناسب یا بدون دسته</td>
+                    <td>4</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="score-box" id="forceConditionScore">امتیاز شرایط نیرو: 0</div>
+    </div>
+    
+    <div class="card" id="step4">
+        <h2>گام ۴: تعیین امتیاز وضعیت و حرکت دست/بازو</h2>
+        
+        <table class="single-select-row-table" style="table-layout: fixed;">
+            <thead>
+                <tr>
+                    <th colspan="2"> 
+                        <span class="tooltip-container">
+                            تعیین امتیاز وضعیت و حرکت دست/بازو 
+                            <span class="tooltip-text">موقعیت‌های معمول باید در نظر گرفته شوند. انحراف [از وضعیت] های نادر قابل چشم‌پوشی هستند.</span> 
+                        </span>
+                    </th>
+                    <th style="width: 80px;">امتیاز</th> 
+                </tr>
+            </thead>
+            <tbody>
+                <tr data-score="0" class="single-select-row" data-group="posture-movement-old">
+                    <td class="posture-image-cell">
+                        <img src="images/hand-posture-0.png" alt="وضعیت دست مناسب">
+                    </td>
+                    <td style="text-align: right; padding-right: 15px; direction: rtl;">
+                        مناسب: وضعیت یا حرکات مفاصل در محدوده میانی (راحت و آرام)، فقط به‌ندرت انحراف از این وضعیت / عدم نگه‌داشتن بازو در حالت ایستا برای مدت طولانی / امکان تکیه دادن دست و بازو در صورت نیاز.
+                    </td>
+                    <td>0</td>
+                </tr>
+                <tr data-score="1" class="single-select-row" data-group="posture-movement-old">
+                    <td class="posture-image-cell">
+                        <img src="images/hand-posture-1.png" alt="وضعیت دست محدود">
+                    </td>
+                    <td style="text-align: right; padding-right: 15px; direction: rtl;">
+                        محدود: گاهی اوقات وضعیت‌ها یا حرکات مفاصل در انتهای محدوده حرکتی / گاهی اوقات نگه‌داشتن بازو در حالت ایستا برای مدت طولانی.
+                    </td>
+                    <td>1</td>
+                </tr>
+                <tr data-score="2" class="single-select-row" data-group="posture-movement-old">
+                    <td class="posture-image-cell">
+                        <img src="images/hand-posture-2.png" alt="وضعیت دست نامطلوب">
+                    </td>
+                    <td style="text-align: right; padding-right: 15px; direction: rtl;">
+                        نامطلوب: وضعیت‌ها یا حرکات مکرر مفاصل در انتهای محدوده حرکتی / نگه‌داشتن مکرر بازو در حالت ایستا برای مدت طولانی.
+                    </td>
+                    <td>2</td>
+                </tr>
+                <tr data-score="3" class="single-select-row" data-group="posture-movement-old">
+                    <td class="posture-image-cell">
+                        <img src="images/hand-posture-3.png" alt="وضعیت دست کاملا نامناسب">
+                    </td>
+                    <td style="text-align: right; padding-right: 15px; direction: rtl;">
+                        کاملا نامناسب: وضعیت‌ها یا حرکات مداوم مفاصل در انتهای محدوده حرکتی / نگه‌داشتن مداوم بازو در حالت ایستا برای مدت طولانی.
+                    </td>
+                    <td>3</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="score-box" id="postureMovementOldScore">امتیاز وضعیت/حرکت دست و بازو: 0</div>
+    </div>
+    
+    <div class="card" id="step5">
+        <h2>گام ۵: تعیین امتیاز شرایط کاری نامطلوب</h2>
+
+        <table class="single-select-row-table">
+            <thead>
+                <tr>
+                    <th>
+                        <span class="tooltip-container">
+                            تعیین امتیاز شرایط کاری نامطلوب (فقط در صورت وجود مشخص کنید):
+                            <span class="tooltip-text">
+                                موقعیت‌های معمول باید در نظر گرفته شوند. انحراف [از وضعیت] های نادر قابل چشم‌پوشی هستند. اگر فعالیت دستی در حال حرکت (مثل راه رفتن یا سینه خیز) انجام شوند، نه در حالت ثابت (نشسته، ایستاده، زانو زدن، چمباتمه زدن یا دراز کشیدن)، بهتر است این فعالیت را با روش KIM-BM هم ارزیابی کنید.
+                            </span>
+                        </span>
+                    </th>
+                    <th style="width: 80px;">امتیاز</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr data-score="0" class="single-select-row" data-group="unfavorable-conditions">
+                    <td>مناسب: هیچ شرایط کاری نامطلوبی وجود ندارد: جزییات به خوبی قابل تشخیص / بدون خیرگی / شرایط آب و هوایی خوب</td>
+                    <td>0</td>
+                </tr>
+                <tr data-score="1" class="single-select-row" data-group="unfavorable-conditions">
+                    <td>محدود: تشخیص جزئیات گاهی اوقات به دلیل خیرگی یا جزئیات بسیار کوچک مختل می‌شود / شرایط سخت مانند سوز، سرما، رطوبت و/یا کاهش تمرکز به‌دلیل سر و صدا.</td>
+                    <td>1</td>
+                </tr>
+                <tr data-score="2" class="single-select-row" data-group="unfavorable-conditions">
+                    <td>نامطلوب: تشخیص جزئیات به طور مکرر به دلیل وجود خیرگی یا جزئیات بسیار کوچک مختل می‌شود / شرایط سخت مانند سوز، سرما، رطوبت و/یا کاهش تمرکز به‌دلیل سر و صدا به‌طور مکرر رخ می‌دهد.</td>
+                    <td>2</td>
+                </tr>
+                <tr style="cursor: default;" class="unselectable-explanation-row"> 
+                    <td colspan="2" style="text-align: right; direction: rtl;">
+                        شاخص‌های ذکر نشده در جدول نیز باید به طور مناسب در نظر گرفته شوند.
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="score-box" id="unfavorableConditionsScore">امتیاز شرایط نامطلوب: 0</div>
+    </div>
+
+    <div class="card" id="step6">
+        <h2>گام ۶: تعیین امتیاز پوسچر/حرکات</h2>
+        
+        <table class="single-select-row-table" style="table-layout: fixed;">
+            <thead>
+                <tr>
+                    <th colspan="2">تعیین امتیاز پوسچر/حرکات </th>
+                    <th style="width: 80px;">امتیاز</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr data-score="0" class="single-select-row" data-group="posture-movement-new">
+                    <td class="posture-image-cell">
+                        <img src="images/body-posture-0.png" alt="پوسچر بدن مناسب">
+                    </td>
+                    <td style="text-align: right; padding-right: 15px; direction: rtl;">
+                        - تغییر وضعیت بین نشستن و ایستادن، تناوب بین ایستادن و راه رفتن، 
+                        <span class="tooltip-container">
+                            نشستن فعال
+                            <span class="tooltip-text">
+                                نشستن فعال (Dynamic Sitting) روشی است که در آن فرد با تغییر مداوم پوسچر‌های نشستن و استفاده از ابزارهای ارگونومیک، از بی‌حرکتی طولانی‌مدت جلوگیری کرده و سلامت جسمانی را بهبود می‌بخشد.
+                            </span>
+                        </span>
+                        امکان‌پذیر است.<br>
+                        - تنه فقط کمی به جلو خم می‌شود.<br>
+                        - بدون پیچش و/یا انحراف جانبی تنه قابل تشخیص نیست.<br>
+                        - پوسچر سر: متغیر، سر به عقب و/یا شدیداً به جلو خم نمی‌شود یا به طور مداوم حرکت نمی‌کند.<br>
+                        - هیچ گونه تلاش جهت دسترسی به ارتفاع بالاتر از شانه / یا گرفتن اشیا در فاصله از بدن وجود ندارد.
+                    </td>
+                    <td>0</td>
+                </tr>
+                <tr data-score="2" class="single-select-row" data-group="posture-movement-new">
+                    <td class="posture-image-cell">
+                        <img src="images/body-posture-2.png" alt="پوسچر بدن محدود">
+                    </td>
+                    <td style="text-align: right; padding-right: 15px; direction: rtl;">
+                        - عمدتاً نشستن یا ایستادن با راه رفتن گهگاهی.<br>
+                        - تنه با خم‌شدگی جزئی به سمت ایستگاه کار<br>
+                        - پیچش و/یا خم شدگی تنه به طرفین گهگاهی قابل تشخیص است.<br>
+                        - انحراف‌های گهگاهی از پوسچر خوب ]خنثی[ سر/حرکت.<br>
+                        - گهگاهی تلاش جهت دسترسی به ارتفاع بالاتر از شانه / چنگش اشیا در فاصله از بدن.
+                    </td>
+                    <td>2</td>
+                </tr>
+                <tr data-score="4" class="single-select-row" data-group="posture-movement-new">
+                    <td class="posture-image-cell">
+                        <img src="images/body-posture-4.png" alt="پوسچر بدن نامطلوب">
+                    </td>
+                    <td style="text-align: right; padding-right: 15px; direction: rtl;">
+                        - منحصراً ایستادن یا نشستن بدون راه رفتن.<br>
+                        - تنه به وضوح به جلو خم شده و/یا پیچ خوردگی و/یا انحراف جانبی تنه مکررا قابل تشخیص است.<br>
+                        - انحراف‌های مکرر از پوسچر خوب (خنثی) سر/حرکت.<br>
+                        - پوسچر سر خمیده به جلو برای تشخیص جزئیات / آزادی حرکت محدود.<br>
+                        - به طور مکرر تلاش جهت دسترسی به ارتفاع بالاتر از شانه / چنگش اشیا در فاصله از بدن.
+                    </td>
+                    <td>4</td>
+                </tr>
+                <tr data-score="6" class="single-select-row" data-group="posture-movement-new">
+                    <td class="posture-image-cell">
+                        <img src="images/body-posture-6.png" alt="پوسچر بدن کاملا نامناسب">
+                    </td>
+                    <td style="text-align: right; padding-right: 15px; direction: rtl;">
+                        - بد: تنه شدیداً به جلو خم شده / خم شدن مکرر یا طولانی مدت.<br>
+                        - کار در حالت زانو زده، چمباتمه، درازکش انجام می‌شود.<br>
+                        - پیچش یا خم‌شدگی تنه به طرفین به‌طور مداوم مشاهده می‌شود<br>
+                        - پوسچر بدن کاملاً ثابت است / کار با ذره‌بین یا میکروسکوپ.<br>
+                        - به طور ثابت انحراف از پوسچر خوب (خنثی) سر/حرکت.<br>
+                        - به طور مداوم تلاش جهت دسترسی به ارتفاع بالاتر از شانه / چنگش اشیا در فاصله از بدن
+                    </td>
+                    <td>
+                        <span class="tooltip-container">
+                            6
+                            <span class="tooltip-text">
+                                لطفا توجه داشته باشید: اگر این دسته انتخاب شد، توصیه می‌شود این فعالیت فرعی را با استفاده از KIM-ABP نیز ارزیابی کنید!
+                            </span>
+                        </span>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="score-box" id="postureMovementNewScore">امتیاز پوسچر/حرکات : 0</div>
+    </div>
+    
+    <div class="card" id="step7">
+        <h2>گام ۷: تعیین امتیاز مربوط به تنوع و تکرار وظایف</h2>
+
+        <table class="single-select-row-table">
+            <thead>
+                <tr>
+                    <th>تعیین امتیاز مربوط به تنوع و تکرار وظایف</th>
+                    <th style="width: 80px;">امتیاز</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr data-score="0" class="single-select-row" data-group="task-variety">
+                    <td>مطلوب: تنوع زیاد فعالیت‌های فیزیکی در طول شیفت کاری به دلیل انجام کارهای مختلف (شامل فعالیت‌هایی با ماهیت متفاوت). همچنین، در طول شیفت، هیچ‌گونه فعالیت سنگین و طولانی‌مدت با ماهیت تکراری وجود ندارد.</td>
+                    <td>0</td>
+                </tr>
+                <tr data-score="2" class="single-select-row" data-group="task-variety">
+                    <td>محدود: تنوع کم در فعالیت‌های فیزیکی. همچنین، گاهی ممکن است فعالیت‌های سنگین کوتاه‌مدت با ماهیت تکراری وجود داشته باشد.</td>
+                    <td>2</td>
+                </tr>
+                <tr data-score="4" class="single-select-row" data-group="task-variety">
+                    <td>نامطلوب: تنوع کم در فعالیت‌های فیزیکی. همچنین، در طول شیفت، فعالیت‌های سنگین، فشرده و تکراری با ماهیت یکسان انجام می‌شود که گاهی با افزایش ناگهانی شدت یا مدت کار همراه است.</td>
+                    <td>4</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="score-box" id="taskVarietyScore">امتیاز تنوع و تکرار وظایف: 0</div>
+    </div>
+    
+    <div class="card" id="step8-card">
+        <h2>گام ۸: محاسبه امتیاز نهایی و تعیین سطح ریسک</h2>
+        
+        <h3>جدول محاسبه امتیاز نهایی</h3>
+        <div class="force-table-container">
+            <table class="final-calc-table">
+                <thead>
+                    <tr>
+                        <th rowspan="2" style="width: 40%;">شاخص</th>
+                        <th colspan="2">امتیاز شاخص</th>
+                    </tr>
+                    <tr>
+                        <th style="width: 30%;">دست راست</th>
+                        <th style="width: 30%;">دست چپ</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <th>نوع اعمال نیرو در ناحیه انگشت/دست</th>
+                        <td id="calc-force-right">—</td>
+                        <td id="calc-force-left">—</td>
+                    </tr>
+                    <tr>
+                        <th>شرایط انتقال نیرو / چنگش</th>
+                        <td colspan="2" id="calc-condition-merged" class="merged-cell-score">—</td>
+                    </tr>
+                    <tr>
+                        <th>وضعیت و حرکت دست/بازو</th>
+                        <td colspan="2" id="calc-handposture-merged" class="merged-cell-score">—</td>
+                    </tr>
+                    <tr>
+                        <th>شرایط کاری نامطلوب</th>
+                        <td colspan="2" id="calc-unfavcond-merged" class="merged-cell-score">—</td>
+                    </tr>
+                    <tr>
+                        <th>پوسچر بدن</th>
+                        <td colspan="2" id="calc-bodyposture-merged" class="merged-cell-score">—</td>
+                    </tr>
+                    <tr>
+                        <th>تنوع و تکرار وظایف</th>
+                        <td colspan="2" id="calc-variety-merged" class="merged-cell-score">—</td>
+                    </tr>
+                    <tr class="sub-total-row">
+                        <th>مجموع امتیازهای شاخص</th>
+                        <td id="calc-sum-right">—</td>
+                        <td id="calc-sum-left">—</td>
+                    </tr>
+                    <tr class="final-score-row">
+                        <th>امتیاز زمان</th>
+                        <td colspan="2" id="final-time-merged" class="merged-cell-score">—</td>
+                    </tr>
+                    <tr class="final-score-row">
+                        <th>مجموع امتیازهای شاخص × امتیاز زمان</th>
+                        <td id="final-score-right" class="final-score-cell">—</td>
+                        <td id="final-score-left" class="final-score-cell">—</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div id="finalMaxScoreDisplay">
+            امتیاز نهایی: <span id="final-max-score-value">—</span>
+        </div>
+        
+        <h3 style="margin-top: 30px;">جدول امتیاز ریسک</h3>
+        <table class="risk-table" id="riskTable">
+            <thead>
+                <tr>
+                    <th>ریسک</th>
+                    <th>سطح ریسک</th>
+                    <th>شدت بار</th>
+                    <th>الف) احتمال اضافه بار فیزیکی<br>ب) پیامدهای احتمالی برای سلامتی</th>
+                    <th>اقدامات</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr id="risk-row-1" data-min="0" data-max="20">
+                    <td>1</td>
+                    <td>کمتر از 20</td>
+                    <td>پایین</td>
+                    <td class="consequence-action-cell">
+                        الف) احتمال اضافه بار فیزیکی کم است.<br>
+                        ب) هیچ خطری برای سلامتی پیش‌بینی نمی‌شود.
+                    </td>
+                    <td>نیازی نیست.</td>
+                </tr>
+                <tr id="risk-row-2" data-min="20" data-max="50">
+                    <td>2</td>
+                    <td>بین 20 تا کمتر از 50</td>
+                    <td>کمی افزایش یافته</td>
+                    <td class="consequence-action-cell">
+                        الف) احتمال اضافه بار فیزیکی برای افراد کم‌تحمل وجود دارد.<br>
+                        ب) خستگی و اختلال سازگاری با شدت کم که در زمان فراغت جبران می‌شود.
+                    </td>
+                    <td>برای افراد کم تحمل، بازطراحی محل کار و سایر اقدامات پیشگیرانه ممکن است مفید باشد.</td>
+                </tr>
+                <tr id="risk-row-3" data-min="50" data-max="100">
+                    <td>3</td>
+                    <td>بین 50 تا کمتر از 100</td>
+                    <td>به‌طور چشمگیری افزایش یافته</td>
+                    <td class="consequence-action-cell">
+                        الف) اضافه بار فیزیکی حتی برای افراد با تحمل متوسط نیز ممکن است رخ دهد.<br>
+                        ب) اختلالات (معمولاً همراه با درد) که ممکن است شامل اختلال عملکرد اندام‌ها باشد، در اکثر موارد موقتی هستند.
+                    </td>
+                    <td>بازطراحی و اقدامات پیشگیرانه باید مورد بررسی قرار گیرند.</td>
+                </tr>
+                <tr id="risk-row-4" data-min="100" data-max="999">
+                    <td>4</td>
+                    <td>برابر یا بیشتر از 100</td>
+                    <td>بالا</td>
+                    <td class="consequence-action-cell">
+                        الف) احتمال اضافه بار فیزیکی بالاست.<br>
+                        ب) آسیب‌های ساختاری قابل توجه با عواقب بیماری‌زا و اختلال عملکردی شدید.
+                    </td>
+                    <td>بازطراحی الزامی است و سایر اقدامات پیشگیرانه نیز باید مدنظر قرار گیرند.</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    
+    <button id="printButton" style="padding: 12px 25px; margin: 30px auto; display: block; font-weight: bold; border-radius: 6px; border: none; background-color: var(--primary-color); color: white; cursor: pointer; font-size: 1.1rem;">
+        🖨️ چاپ نتایج نهایی
+    </button>
+    <script>
+    
+    // ---------------------- منطق محاسبه امتیاز زمان (Step 1) ----------------------
+    function calcTimeScore() {
+        let score = null;
+        const customInput = document.getElementById('timeCustom').value;
+        const customDuration = parseFloat(customInput);
+        
+        if (!isNaN(customDuration) && customDuration > 0) {
+            score = Math.min(customDuration, 10); 
+        } else {
+            const selectedCell = document.querySelector('.selectable-cell.selected[data-group="time1"]');
+            if (selectedCell) {
+                score = parseFloat(selectedCell.dataset.score);
+            }
+        }
+        score = score === null ? 1 : score; 
+        document.getElementById('timeScore').innerHTML = `امتیاز زمان: ${score.toFixed(1)}`;
+        return score; 
+    }
+
+    // ---------------------- منطق انتخاب سلول (Step 1) ----------------------
+    function handleCellSelection(event) {
+        const cell = event.currentTarget;
+        const group = cell.getAttribute('data-group');
+        const isSelected = cell.classList.contains('selected');
+
+        if (group !== 'time1') return;
+
+        document.querySelectorAll(`.selectable-cell[data-group="${group}"]`).forEach(c => {
+            c.classList.remove('selected');
+        });
+        
+        if (!isSelected) {
+            cell.classList.add('selected');
+            document.getElementById('timeCustom').value = '';
+        } else {
+            const defaultTimeCell = document.querySelector(`.selectable-cell[data-group="time1"][data-score="1"]`);
+            if (defaultTimeCell) defaultTimeCell.classList.add('selected');
+        }
+        
+        calculateScores();
+    }
+    
+    // ---------------------- منطق انتخاب امتیاز نیرو (Step 2) ----------------------
+    function handleForceScoreSelection(event) {
+        const cell = event.currentTarget;
+        let handMode = document.querySelector('input[name="handMode"]:checked').value; 
+        const currentClass = handMode === 'right' ? 'selected-right' : 'selected-left';
+        const oppositeClass = handMode === 'right' ? 'selected-left' : 'selected-right';
+        
+        const isCurrentHandSelected = cell.classList.contains(currentClass) || cell.classList.contains('selected-both');
+        const isOppositeHandSelected = cell.classList.contains(oppositeClass) || cell.classList.contains('selected-both');
+
+        // 1. پاکسازی جهانی و تبدیل حالت‌های Dual: 
+        document.querySelectorAll('.force-score-table tbody td').forEach(c => {
+            // اگر قبلاً Dual بود، آن را به تک انتخابی دست مخالف تبدیل کن
+            if (c.classList.contains('selected-both')) {
+                c.classList.remove('selected-both');
+                c.classList.add(oppositeClass);
+            }
+            // حذف تک انتخابی دست فعال
+            c.classList.remove(currentClass);
+        });
+
+        // 3. منطق محلی روی سلول کلیک شده
+        if (!isCurrentHandSelected) {
+            
+            if (isOppositeHandSelected) {
+                // دست مخالف قبلاً آن را داشت -> حالا انتخاب Dual (selected-both)
+                cell.classList.remove(oppositeClass); // حذف انتخاب مخالف
+                cell.classList.add('selected-both');
+            } else {
+                // هیچ دستی آن را نداشت -> انتخاب تکی دست فعال
+                cell.classList.add(currentClass);
+            }
+            
+            // سوئیچ خودکار به رادیو باتن دست دیگر برای کلیک بعدی
+            const otherHand = handMode === 'right' ? 'left' : 'right';
+            document.getElementById(`handMode${otherHand.charAt(0).toUpperCase() + otherHand.slice(1)}`).checked = true;
+            
+        } 
+        
+        // 4. به‌روزرسانی نمایش امتیاز
+        updateForceScoresAndDisplay();
+    }
+
+
+    // ---------------------- منطق محاسبه برون یابی دینامیک (اصلاح شده) ----------------------
+    const EXTRAP_SLOPES = [
+        0.0667, // Row 1: (7 - 5) / 30 = 0.0667
+        0.1167, // Row 2: (11 - 7.5) / 30 = 0.1167
+        0.2,    // Row 3: (18 - 12) / 30 = 0.2
+        2.7,    // Row 4: (100 - 19) / 30 = 2.7
+        0,      // Row 5: (100 - 100) / 30 = 0
+        0       // Row 6: (100 - 100) / 30 = 0
+    ];
+    
+    const EXTRAP_BASE_SCORES = [
+        7,    // Row 1: Score at 90
+        11,   // Row 2: Score at 90
+        18,   // Row 3: Score at 90
+        100,  // Row 4: Score at 90 (Max)
+        100,  // Row 5: Score at 90 (Max)
+        100   // Row 6: Score at 90 (Max)
+    ];
+
+
+    function calculateExtrapolationScore(rowIndex, S_user_raw) {
+        const S_user = S_user_raw ? parseFloat(S_user_raw) : NaN;
+        const MAX_SCORE = 100;
+        const MIN_EXTRAP_INPUT = 90;
+        const BASE_INPUT_DURATION = 90; // The starting point for extrapolation
+        
+        if (isNaN(S_user) || S_user <= MIN_EXTRAP_INPUT) { 
+            return ''; 
+        }
+        
+        const slope = EXTRAP_SLOPES[rowIndex];
+        const baseScore = EXTRAP_BASE_SCORES[rowIndex];
+        
+        // New calculation: Score = Base Score + Slope * (User Input - 90)
+        let calculatedScore = baseScore + slope * (S_user - BASE_INPUT_DURATION);
+        
+        // Ensure score does not exceed 100
+        const finalScore = Math.min(calculatedScore, MAX_SCORE);
+
+        // For rows 4, 5, 6 where S90 is already 100, the calculatedScore must also be 100.
+        if (baseScore === MAX_SCORE) {
+             return MAX_SCORE.toFixed(1);
+        }
+
+        return finalScore.toFixed(1);
+    }
+
+    function updateExtrapolationCells() {
+        const S_user_raw = document.getElementById('extrapHeaderDDD').value;
+        
+        document.querySelectorAll('.force-score-table tbody tr').forEach((row, index) => {
+            const extrapCell = row.querySelector('td[data-extrap-cell]');
+            // Get row index from the description cell (for accuracy)
+            const descCell = row.querySelector('.force-desc-cell');
+            const rowIndex = descCell ? parseInt(descCell.getAttribute('data-row-index')) : index;
+            
+            if (extrapCell) {
+                const calculatedScoreString = calculateExtrapolationScore(rowIndex, S_user_raw);
+                extrapCell.textContent = calculatedScoreString;
+                extrapCell.setAttribute('data-calculated-score', calculatedScoreString);
+            }
+        });
+
+        updateForceScoresAndDisplay();
+    }
+
+
+    // ---------------------- محاسبه و نمایش نهایی امتیاز نیرو (Step 2) ----------------------
+    function getCellScore(cell) {
+        if (!cell) return null;
+
+        if (cell.hasAttribute('data-extrap-cell')) {
+            const calculatedScoreString = cell.getAttribute('data-calculated-score');
+            return calculatedScoreString === '' ? null : parseFloat(calculatedScoreString);
+        } else {
+            const textContent = cell.textContent.trim();
+            // Handle the score cell which contains the tooltip span, need to extract inner text
+            let scoreText = cell.textContent.trim();
+            const tooltipSpan = cell.querySelector('.tooltip-container');
+            if (tooltipSpan) {
+                // Get the text content of the tooltip container itself (the score number)
+                scoreText = Array.from(tooltipSpan.childNodes)
+                    .filter(node => node.nodeType === 3) // Filter for Text nodes
+                    .map(node => node.textContent.trim())
+                    .join('');
+            }
+            
+            if (scoreText === '' || isNaN(parseFloat(scoreText))) return null;
+            return parseFloat(scoreText);
+        }
+    }
+
+    function updateForceScoresAndDisplay() {
+        
+        let maxRightScore = null;
+        let maxLeftScore = null;
+
+        document.querySelectorAll('.force-score-table tbody td').forEach(cell => {
+            const score = getCellScore(cell);
+            if (score === null) return;
+
+            if (cell.classList.contains('selected-right') || cell.classList.contains('selected-both')) {
+                if (maxRightScore === null || score > maxRightScore) {
+                    maxRightScore = score;
+                }
+            }
+            
+            if (cell.classList.contains('selected-left') || cell.classList.contains('selected-both')) {
+                if (maxLeftScore === null || score > maxLeftScore) {
+                    maxLeftScore = score;
+                }
+            }
+        });
+
+        document.getElementById('force-score-right').textContent = maxRightScore !== null ? maxRightScore.toFixed(1) : '—';
+        document.getElementById('force-score-left').textContent = maxLeftScore !== null ? maxLeftScore.toFixed(1) : '—';
+        
+        calculateScores(); 
+    }
+    
+    
+    // ---------------------- منطق انتخاب ردیف تکی (Step 3, 4, 5, 6, 7) ----------------------
+    function handleRowSelection(event) {
+        const row = event.currentTarget;
+        const group = row.getAttribute('data-group');
+        
+        if (!group) return; // Ignore explanation rows
+
+        const isSelected = row.classList.contains('selected-row');
+
+        // Remove selection from all rows in the same group
+        document.querySelectorAll(`.single-select-row[data-group="${group}"]`).forEach(r => {
+            r.classList.remove('selected-row');
+        });
+        
+        let newScore = 0;
+
+        if (!isSelected) {
+            // Select the clicked row
+            row.classList.add('selected-row');
+            newScore = parseFloat(row.dataset.score);
+        }
+        
+        // Update the display for the corresponding score box
+        if (group === 'force-condition') {
+             document.getElementById('forceConditionScore').innerHTML = `امتیاز شرایط نیرو: ${newScore}`;
+        } else if (group === 'posture-movement-old') {
+             document.getElementById('postureMovementOldScore').innerHTML = `امتیاز وضعیت/حرکت دست و بازو: ${newScore}`;
+        } else if (group === 'unfavorable-conditions') {
+             document.getElementById('unfavorableConditionsScore').innerHTML = `امتیاز شرایط نامطلوب: ${newScore}`;
+        } else if (group === 'posture-movement-new') {
+             document.getElementById('postureMovementNewScore').innerHTML = `امتیاز پوسچر/حرکات : ${newScore}`;
+        } else if (group === 'task-variety') { 
+             document.getElementById('taskVarietyScore').innerHTML = `امتیاز تنوع و تکرار وظایف: ${newScore}`;
+        }
+
+
+        calculateScores(); 
+    }
+    
+    
+    // ---------------------- تابع جدید برای ارزیابی ریسک (با اعمال رنگ) ----------------------
+    function updateRiskTable(finalScoreMax) {
+        document.querySelectorAll('#riskTable tbody tr').forEach(row => {
+            // حذف هایلایت و کلاس‌های رنگی در هر به‌روزرسانی
+            row.classList.remove('current-risk-level', 'risk-row-1', 'risk-row-2', 'risk-row-3', 'risk-row-4'); 
+            
+            let isInRange = false;
+            let colorClass = '';
+
+            // منطق تعیین محدوده
+            if (row.id === 'risk-row-1' && finalScoreMax < 20) {
+                 isInRange = true;
+                 colorClass = 'risk-row-1'; 
+            } else if (row.id === 'risk-row-2' && finalScoreMax >= 20 && finalScoreMax < 50) {
+                 isInRange = true;
+                 colorClass = 'risk-row-2'; 
+            } else if (row.id === 'risk-row-3' && finalScoreMax >= 50 && finalScoreMax < 100) {
+                 isInRange = true;
+                 colorClass = 'risk-row-3'; 
+            } else if (row.id === 'risk-row-4' && finalScoreMax >= 100) {
+                 isInRange = true;
+                 colorClass = 'risk-row-4'; 
+            }
+            
+            if (isInRange) {
+                row.classList.add('current-risk-level');
+                row.classList.add(colorClass); 
+            }
+        });
+    }
+    
+    // ---------------------- تابع مرکزی محاسبه (شامل گام 8) ----------------------
+    function calculateScores() {
+        const timeScore = calcTimeScore();
+        
+        // 1. Get Hand-Specific Scores (Step 2 - Force)
+        const forceScoreRight = parseFloat(document.getElementById('force-score-right').textContent.replace('—', '0')) || 0;
+        const forceScoreLeft = parseFloat(document.getElementById('force-score-left').textContent.replace('—', '0')) || 0;
+        
+        // 2. Get Single-Select Scores (Step 3, 4, 5, 6, 7)
+        const getSingleScore = (group) => {
+            const selectedRow = document.querySelector(`.single-select-row[data-group="${group}"].selected-row`);
+            // If no row is selected, default to 0 (since default state for all these groups is score 0 row selected)
+            return selectedRow ? parseFloat(selectedRow.dataset.score) : 0;
+        };
+        
+        const conditionScore = getSingleScore('force-condition'); // Step 3
+        const handPostureScore = getSingleScore('posture-movement-old'); // Step 4 (Hand/Arm)
+        const unfavCondScore = getSingleScore('unfavorable-conditions'); // Step 5
+        const bodyPostPostureScore = getSingleScore('posture-movement-new'); // Step 6 (Body Posture)
+        const varietyScore = getSingleScore('task-variety'); // Step 7
+        
+        // 3. Calculate Sum Scores
+        const sumR = forceScoreRight + conditionScore + handPostureScore + unfavCondScore + bodyPostPostureScore + varietyScore;
+        const sumL = forceScoreLeft + conditionScore + handPostureScore + unfavCondScore + bodyPostPostureScore + varietyScore;
+        
+        // 4. Calculate Final Scores
+        const finalScoreR = sumR * timeScore;
+        const finalScoreL = sumL * timeScore;
+
+        // 5. Update Calculation Table (Step 8)
+        
+        // Force (Hand-Specific)
+        document.getElementById('calc-force-right').textContent = forceScoreRight.toFixed(1);
+        document.getElementById('calc-force-left').textContent = forceScoreLeft.toFixed(1);
+        
+        // Merged Scores
+        document.getElementById('calc-condition-merged').textContent = conditionScore.toFixed(1);
+        document.getElementById('calc-handposture-merged').textContent = handPostureScore.toFixed(1);
+        document.getElementById('calc-unfavcond-merged').textContent = unfavCondScore.toFixed(1);
+        document.getElementById('calc-bodyposture-merged').textContent = bodyPostPostureScore.toFixed(1);
+        document.getElementById('calc-variety-merged').textContent = varietyScore.toFixed(1);
+        
+        // Sub-Total
+        document.getElementById('calc-sum-right').textContent = sumR.toFixed(1);
+        document.getElementById('calc-sum-left').textContent = sumL.toFixed(1);
+        
+        // Time Score (Merged)
+        document.getElementById('final-time-merged').textContent = timeScore.toFixed(1);
+        
+        // Final Score
+        document.getElementById('final-score-right').textContent = finalScoreR.toFixed(1);
+        document.getElementById('final-score-left').textContent = finalScoreL.toFixed(1);
+        
+        // 6. Max Score Display & Risk Assessment
+        const finalScoreMax = Math.max(finalScoreR, finalScoreL);
+        document.getElementById('final-max-score-value').textContent = finalScoreMax.toFixed(1);
+        updateRiskTable(finalScoreMax);
+    }
+
+    // ---------------------- پرینت ----------------------
+    function handlePrint() {
+        window.print();
+    }
+
+    // ---------------------- بازنشانی ----------------------
+    function resetForm() {
+        // Reset Step 1
+        document.querySelectorAll('.selectable-cell').forEach(cell => { cell.classList.remove('selected'); });
+        document.getElementById('timeCustom').value = '';
+        const defaultTimeCell = document.querySelector('.selectable-cell[data-group="time1"][data-score="1"]');
+        if (defaultTimeCell) defaultTimeCell.classList.add('selected');
+
+        // Reset Step 2 Force Scores and Extrapolation
+        document.querySelectorAll('.force-score-table td.selected-right, .force-score-table td.selected-left, .force-score-table td.selected-both').forEach(c => {
+            c.classList.remove('selected-right', 'selected-left', 'selected-both');
+        });
+        document.getElementById('extrapHeaderDDD').value = ''; 
+        document.getElementById('handModeRight').checked = true; 
+        document.getElementById('force-score-right').textContent = '—';
+        document.getElementById('force-score-left').textContent = '—';
+        updateExtrapolationCells(); // Recalculate based on empty input
+        
+        // Reset Step 3, 4, 5, 6, 7
+        const resetSingleSelectGroup = (group, scoreBoxId, defaultText) => {
+            document.querySelectorAll(`.single-select-row[data-group="${group}"]`).forEach(row => { row.classList.remove('selected-row'); });
+            const defaultRow = document.querySelector(`.single-select-row[data-group="${group}"][data-score="0"]`);
+            if (defaultRow) defaultRow.classList.add('selected-row'); 
+            document.getElementById(scoreBoxId).innerHTML = defaultText;
+        };
+        
+        resetSingleSelectGroup('force-condition', 'forceConditionScore', `امتیاز شرایط نیرو: 0`);
+        resetSingleSelectGroup('posture-movement-old', 'postureMovementOldScore', `امتیاز وضعیت/حرکت دست و بازو: 0`);
+        resetSingleSelectGroup('unfavorable-conditions', 'unfavorableConditionsScore', `امتیاز شرایط نامطلوب: 0`);
+        resetSingleSelectGroup('posture-movement-new', 'postureMovementNewScore', `امتیاز پوسچر/حرکات : 0`);
+        resetSingleSelectGroup('task-variety', 'taskVarietyScore', `امتیاز تنوع و تکرار وظایف: 0`);
+
+
+        // Reset Step 8 (New Calculation/Risk Table)
+        const resetFinalScoreCell = (id) => {
+             const element = document.getElementById(id);
+             if (element) element.textContent = '—';
+        };
+        
+        ['calc-force-right', 'calc-force-left', 
+         'calc-condition-merged', 'calc-handposture-merged',
+         'calc-unfavcond-merged', 'calc-bodyposture-merged',
+         'calc-variety-merged', 'calc-sum-right', 'calc-sum-left',
+         'final-time-merged', 'final-score-right', 'final-score-left', 'final-max-score-value'
+        ].forEach(resetFinalScoreCell);
+        
+        // حذف تمام کلاس‌های ریسک برای بی رنگ شدن
+        document.querySelectorAll('#riskTable tbody tr').forEach(row => {
+             row.classList.remove('current-risk-level', 'risk-row-1', 'risk-row-2', 'risk-row-3', 'risk-row-4'); 
+        });
+
+        calculateScores(); 
+    }
+
+    // ---------------------- Initialization ----------------------
+    function init() {
+        // Step 1 Listeners
+        document.querySelectorAll('.selectable-cell[data-group="time1"]').forEach(cell => {
+            cell.addEventListener('click', handleCellSelection);
+        });
+        document.getElementById('timeCustom').addEventListener('input', calculateScores);
+        
+        // Step 2 Listeners (Force Scores & Extrapolation)
+        document.querySelectorAll('.force-score-table tbody td[data-score], .force-score-table tbody td[data-extrap-cell]').forEach(cell => {
+            cell.addEventListener('click', handleForceScoreSelection);
+        });
+        document.getElementById('extrapHeaderDDD').addEventListener('input', updateExtrapolationCells);
+        document.querySelectorAll('input[name="handMode"]').forEach(radio => {
+            radio.addEventListener('change', updateForceScoresAndDisplay);
+        });
+
+        // Step 3, 4, 5, 6, & 7 Listener 
+        document.querySelectorAll('.single-select-row').forEach(row => {
+            row.addEventListener('click', handleRowSelection);
+        });
+
+        // Reset Listener
+        document.getElementById('resetForm').addEventListener('click', resetForm);
+        
+        // Print Listener
+        document.getElementById('printButton').addEventListener('click', handlePrint);
+
+        // Set initial state
+        resetForm();
+    }
+
+    document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>
+
+

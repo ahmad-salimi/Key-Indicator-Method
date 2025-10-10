@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>سیستم ارزیابی KIM</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css">
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --accent-color: #e74c3c;
+            --light-bg: #f8f9fa;
+            --card-bg: #ffffff;
+            --text-color: #2c3e50;
+            --border-radius: 12px;
+            --box-shadow: 0 6px 15px rgba(0, 0, 0, 0.08);
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Vazirmatn, Tahoma, sans-serif;
+            background-color: var(--light-bg);
+            color: var(--text-color);
+            line-height: 1.6;
+            padding: 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 20px 0;
+            border-bottom: 2px solid var(--secondary-color);
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            color: var(--secondary-color);
+        }
+
+        .main-container {
+            display: flex;
+            gap: 30px;
+            flex-wrap: wrap;
+        }
+
+        .options-container {
+            flex: 1;
+            min-width: 300px;
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+
+        .description-container {
+            flex: 1;
+            min-width: 300px;
+            background-color: var(--card-bg);
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            padding: 25px;
+            height: fit-content;
+            position: sticky;
+            top: 20px;
+        }
+
+        .description-container h2 {
+            color: var(--primary-color);
+            margin-bottom: 20px;
+            text-align: center;
+            border-bottom: 2px solid var(--secondary-color);
+            padding-bottom: 10px;
+        }
+
+        .description-content {
+            font-size: 1rem;
+            line-height: 1.7;
+            margin-bottom: 25px;
+        }
+
+        .start-button {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, var(--secondary-color), #2980b9);
+            color: white;
+            text-decoration: none;
+            border-radius: var(--border-radius);
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.1rem;
+            transition: var(--transition);
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(52, 152, 219, 0.3);
+        }
+
+        .start-button:hover {
+            background: linear-gradient(135deg, #2980b9, var(--secondary-color));
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(52, 152, 219, 0.4);
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            padding: 20px;
+            transition: var(--transition);
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            border: 2px solid transparent;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 20px rgba(0, 0, 0, 0.15);
+            border-color: var(--secondary-color);
+        }
+
+        .card.active {
+            border-color: var(--secondary-color);
+            background-color: #f0f8ff;
+        }
+
+        .card-title {
+            font-size: 1.2rem;
+            color: var(--primary-color);
+            margin-bottom: 8px;
+            text-align: center;
+        }
+
+        .card-subtitle {
+            font-size: 0.9rem;
+            color: var(--secondary-color);
+            margin-bottom: 15px;
+            text-align: center;
+            font-weight: 500;
+        }
+
+        .card-images {
+            display: flex;
+            justify-content: space-between;
+            gap: 8px;
+            margin-top: auto;
+        }
+
+        .image-placeholder {
+            width: 30%;
+            aspect-ratio: 1/1;
+            background-color: #ecf0f1;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            border: 1px solid #ddd;
+        }
+
+        .image-placeholder img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .footer {
+            direction: ltr;
+            text-align: left;
+            margin-top: 40px;
+            padding: 20px 0;
+            border-top: 1px solid #ddd;
+            color: #7f8c8d;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 768px) {
+            .main-container {
+                flex-direction: column;
+            }
+            
+            .description-container {
+                position: static;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>روش شاخص کلیدی برای ارزیابی و طراحی بار کار فیزیکی </h1>
+        <p>Key Indicator Method (KIM) for Physical Workload Assessment</p>
+    </div>
+
+    <div class="main-container">
+        <div class="options-container">
+            <div class="options-grid">
+                <!-- کارت 1: KIM-LHC -->
+                <div class="card active" data-description="این روش برای ارزیابی ریسک‌های ناشی از بلند کردن، نگه داشتن و حمل بارهای دستی طراحی شده است. این روش به شناسایی وظایفی که ممکن است باعث آسیب‌های اسکلتی-عضلانی شوند کمک می‌کند." data-link="kim-lhc.html">
+                    <h2 class="card-title">بلند کردن، نگه داشتن و حمل بار</h2>
+                    <p class="card-subtitle">KIM-LHC</p>
+                    <div class="card-images">
+                        <div class="image-placeholder">
+                            <img src="images/lhc-1.jpg" alt="بلند کردن بار">
+                        </div>
+                        <div class="image-placeholder">
+                            <img src="images/lhc-2.jpg" alt="نگه داشتن بار">
+                        </div>
+                        <div class="image-placeholder">
+                            <img src="images/lhc-3.jpg" alt="حمل بار">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- کارت 2: KIM-PP -->
+                <div class="card" data-description="این روش برای ثبت و ارزیابی بار فیزیکی ناشی از جابه‌جایی بار با ابزارهای کمکی حمل بار، کانوایرهای هوایی و جرثقیل‌های سقفی طراحی شده است. وسایل حمل‌ونقل می‌توانند شامل فرغون، گاری، چرخ‌دستی یا کالسکه با ۳ تا ۶ چرخ باشند که آزادانه روی زمین و در تمامی جهات با نیروی دست حرکت می‌کنند. کانوایرهای هوایی، سیستم‌های تک‌ریلی هستند که بار را در یک مسیر مشخص جابه‌جا می‌کنند، در حالی که جرثقیل‌های سقفی تک‌پل امکان جابه‌جایی بار در تمام جهات یک فضا را فراهم می‌سازند. همچنین این روش برای ارزیابی کار با تجهیزات چرخ‌داری که نیاز به نیروی اضافی ندارند (مانند چرخ متر) نیز کاربرد دارد." data-link="kim-pp.html">
+                    <h2 class="card-title">هل دادن و کشیدن دستی بار</h2>
+                    <p class="card-subtitle">KIM-PP</p>
+                    <div class="card-images">
+                        <div class="image-placeholder">
+                            <img src="images/pp-1.jpg" alt="هل دادن بار">
+                        </div>
+                        <div class="image-placeholder">
+                            <img src="images/pp-2.jpg" alt="کشیدن بار">
+                        </div>
+                        <div class="image-placeholder">
+                            <img src="images/pp-3.jpg" alt="وسایل حمل بار">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- کارت 3: KIM-MHO -->
+                <div class="card" data-description="این روش برای ارزیابی ریسک‌های ناشی از فعالیت‌های دستی طراحی شده است. این روش به شناسایی وظایفی که ممکن است باعث آسیب‌های اسکلتی-عضلانی شوند کمک می‌کند." data-link="kim-mho.html">
+                    <h2 class="card-title">فعالیت‌های دستی</h2>
+                    <p class="card-subtitle">KIM-MHO</p>
+                    <div class="card-images">
+                        <div class="image-placeholder">
+                            <img src="images/mho-1.jpg" alt="کار دستی">
+                        </div>
+                        <div class="image-placeholder">
+                            <img src="images/mho-2.jpg" alt="ابزار دستی">
+                        </div>
+                        <div class="image-placeholder">
+                            <img src="images/mho-3.jpg" alt="فعالیت تکراری">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- کارت 4: KIM-BM -->
+                <div class="card" data-description="این روش برای ارزیابی ریسک‌های ناشی از جابجایی بدنی طراحی شده است. این روش به شناسایی وظایفی که ممکن است باعث آسیب‌های اسکلتی-عضلانی شوند کمک می‌کند." data-link="kim-bm.html">
+                    <h2 class="card-title">جابجایی بدنی</h2>
+                    <p class="card-subtitle">KIM-BM</p>
+                    <div class="card-images">
+                        <div class="image-placeholder">
+                            <img src="images/bm-1.jpg" alt="حرکت بدن">
+                        </div>
+                        <div class="image-placeholder">
+                            <img src="images/bm-2.jpg" alt="تغییر موقعیت">
+                        </div>
+                        <div class="image-placeholder">
+                            <img src="images/bm-3.jpg" alt="حرکت در محیط کار">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- کارت 5: KIM-BF -->
+                <div class="card" data-description="این روش برای ارزیابی ریسک‌های ناشی از وظایف نیازمند اعمال نیرو با تمام بدن طراحی شده است. این روش به شناسایی وظایفی که ممکن است باعث آسیب‌های اسکلتی-عضلانی شوند کمک می‌کند." data-link="kim-bf.html">
+                    <h2 class="card-title">اعمال نیرو با تمام بدن</h2>
+                    <p class="card-subtitle">KIM-BF</p>
+                    <div class="card-images">
+                        <div class="image-placeholder">
+                            <img src="images/bf-1.jpg" alt="اعمال نیرو">
+                        </div>
+                        <div class="image-placeholder">
+                            <img src="images/bf-2.jpg" alt="کار با تمام بدن">
+                        </div>
+                        <div class="image-placeholder">
+                            <img src="images/bf-3.jpg" alt="فعالیت بدنی سنگین">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- کارت 6: KIM-ABP -->
+                <div class="card" data-description="این روش برای ارزیابی ریسک‌های ناشی از پوسچرهای بدنی نامناسب طراحی شده است. این روش به شناسایی وظایفی که ممکن است باعث آسیب‌های اسکلتی-عضلانی شوند کمک می‌کند." data-link="kim-abp.html">
+                    <h2 class="card-title">پوسچرهای بدنی نامناسب</h2>
+                    <p class="card-subtitle">KIM-ABP</p>
+                    <div class="card-images">
+                        <div class="image-placeholder">
+                            <img src="images/abp-1.jpg" alt="پوسچر نامناسب">
+                        </div>
+                        <div class="image-placeholder">
+                            <img src="images/abp-2.jpg" alt="وضعیت بدنی اشتباه">
+                        </div>
+                        <div class="image-placeholder">
+                            <img src="images/abp-3.jpg" alt="ارگونومی ضعیف">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="description-container">
+            <h2>توضیحات روش</h2>
+            <div class="description-content" id="descriptionText">
+                این روش برای ارزیابی ریسک‌های ناشی از بلند کردن، نگه داشتن و حمل بارهای دستی طراحی شده است. این روش به شناسایی وظایفی که ممکن است باعث آسیب‌های اسکلتی-عضلانی شوند کمک می‌کند.
+            </div>
+            <a href="kim-lhc.html" class="start-button" id="startButton">شروع ارزیابی</a>
+        </div>
+    </div>
+
+    <div class="footer">
+    <p>
+        With kind permission of the Bundesanstalt für Arbeitsschutz und Arbeitsmedizin (BAuA).<br>
+        Translation and software development by Ahmad Salimi.
+    </p>
+</div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const cards = document.querySelectorAll('.card');
+            const descriptionText = document.getElementById('descriptionText');
+            const startButton = document.getElementById('startButton');
+            
+            // فعال کردن اولین کارت به صورت پیش‌فرض
+            cards[0].classList.add('active');
+            
+            cards.forEach(card => {
+                card.addEventListener('click', function() {
+                    // حذف کلاس active از همه کارت‌ها
+                    cards.forEach(c => c.classList.remove('active'));
+                    
+                    // اضافه کردن کلاس active به کارت انتخاب شده
+                    this.classList.add('active');
+                    
+                    // نمایش توضیحات مربوطه
+                    const description = this.getAttribute('data-description');
+                    descriptionText.textContent = description;
+                    
+                    // به‌روزرسانی لینک دکمه شروع ارزیابی
+                    const link = this.getAttribute('data-link');
+                    startButton.href = link;
+                });
+            });
+        });
+    </script>
+</body>
+</html>
