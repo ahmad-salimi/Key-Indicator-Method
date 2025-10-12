@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>سیستم ارزیابی KIM</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
             --primary-color: #2c3e50;
@@ -110,12 +111,36 @@
             border: none;
             cursor: pointer;
             box-shadow: 0 4px 10px rgba(52, 152, 219, 0.3);
+            margin-bottom: 15px;
         }
 
         .start-button:hover {
             background: linear-gradient(135deg, #2980b9, var(--secondary-color));
             transform: translateY(-2px);
             box-shadow: 0 6px 15px rgba(52, 152, 219, 0.4);
+        }
+
+        .pdf-link {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #27ae60, #2ecc71);
+            color: white;
+            text-decoration: none;
+            border-radius: var(--border-radius);
+            text-align: center;
+            font-weight: bold;
+            font-size: 1rem;
+            transition: var(--transition);
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(39, 174, 96, 0.3);
+        }
+
+        .pdf-link:hover {
+            background: linear-gradient(135deg, #2ecc71, #27ae60);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(39, 174, 96, 0.4);
         }
 
         .card {
@@ -194,6 +219,59 @@
             font-size: 0.9rem;
         }
 
+        .copyright {
+            direction: rtl;
+            text-align: center;
+            margin-bottom: 15px;
+            line-height: 1.8;
+        }
+
+        .copyright-farsi {
+            color: var(--primary-color);
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+
+        .copyright-german {
+            color: #7f8c8d;
+            font-size: 0.9rem;
+            margin-bottom: 20px;
+        }
+
+        .contact-info {
+            direction: rtl;
+            text-align: center;
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: var(--border-radius);
+        }
+
+        .social-links {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 10px;
+        }
+
+        .social-links a {
+            color: var(--primary-color);
+            font-size: 1.5rem;
+            transition: var(--transition);
+        }
+
+        .social-links a:hover {
+            color: var(--secondary-color);
+            transform: translateY(-3px);
+        }
+
+        .logo {
+            font-weight: bold;
+            color: var(--primary-color);
+            margin-top: 10px;
+            font-family: Arial, sans-serif;
+        }
+
         @media (max-width: 768px) {
             .main-container {
                 flex-direction: column;
@@ -201,6 +279,10 @@
             
             .description-container {
                 position: static;
+            }
+            
+            .options-grid {
+                grid-template-columns: 1fr;
             }
         }
     </style>
@@ -215,7 +297,7 @@
         <div class="options-container">
             <div class="options-grid">
                 <!-- کارت 1: KIM-LHC -->
-                <div class="card active" data-description="این روش برای ارزیابی ریسک‌های ناشی از بلند کردن، نگه داشتن و حمل بارهای دستی طراحی شده است. این روش به شناسایی وظایفی که ممکن است باعث آسیب‌های اسکلتی-عضلانی شوند کمک می‌کند." data-link="kim-lhc.html">
+                <div class="card active" data-description="این روش برای ارزیابی ریسک‌های ناشی از بلند کردن، نگه داشتن و حمل بارهای دستی طراحی شده است. این روش به شناسایی وظایفی که ممکن است باعث آسیب‌های اسکلتی-عضلانی شوند کمک می‌کند. فعالیت‌های معمول شامل: بارگیری/تخلیه کیسه‌ها، مرتب کردن بسته‌ها، بارگیری تجهیزات بدون وسایل کمکی حمل بار، چیدن، جابجایی کاله‌ای بالتی، انجام تعمیرات در ناحیه بالای سر، مراقبت از کودکان در مراکز مهندس و همچنین حمل دستی بیماران می‌باشد." data-link="kim-lhc.html" data-pdf="data/KIM-LHC.pdf">
                     <h2 class="card-title">بلند کردن، نگه داشتن و حمل بار</h2>
                     <p class="card-subtitle">KIM-LHC</p>
                     <div class="card-images">
@@ -232,7 +314,7 @@
                 </div>
 
                 <!-- کارت 2: KIM-PP -->
-                <div class="card" data-description="این روش برای ثبت و ارزیابی بار فیزیکی ناشی از جابه‌جایی بار با ابزارهای کمکی حمل بار، کانوایرهای هوایی و جرثقیل‌های سقفی طراحی شده است. وسایل حمل‌ونقل می‌توانند شامل فرغون، گاری، چرخ‌دستی یا کالسکه با ۳ تا ۶ چرخ باشند که آزادانه روی زمین و در تمامی جهات با نیروی دست حرکت می‌کنند. کانوایرهای هوایی، سیستم‌های تک‌ریلی هستند که بار را در یک مسیر مشخص جابه‌جا می‌کنند، در حالی که جرثقیل‌های سقفی تک‌پل امکان جابه‌جایی بار در تمام جهات یک فضا را فراهم می‌سازند. همچنین این روش برای ارزیابی کار با تجهیزات چرخ‌داری که نیاز به نیروی اضافی ندارند (مانند چرخ متر) نیز کاربرد دارد." data-link="kim-pp.html">
+                <div class="card" data-description="برای ارزیابی فشار فیزیکی هنگام جابه‌جایی بار با وسایل کمکی مثل فرغون، گاری، چرخ‌دستی، کالسکه‌های چندچرخ، کانوایر هوایی و جرثقیل سقفی استفاده می‌شود. همچنین برای کار با تجهیزات چرخ‌دار ساده که نیاز به نیروی اضافی ندارند (مثل چرخ‌متر) هم قابل استفاده است." data-link="kim-pp.html" data-pdf="data/KIM-PP.pdf">
                     <h2 class="card-title">هل دادن و کشیدن دستی بار</h2>
                     <p class="card-subtitle">KIM-PP</p>
                     <div class="card-images">
@@ -249,7 +331,7 @@
                 </div>
 
                 <!-- کارت 3: KIM-MHO -->
-                <div class="card" data-description="این روش برای ارزیابی ریسک‌های ناشی از فعالیت‌های دستی طراحی شده است. این روش به شناسایی وظایفی که ممکن است باعث آسیب‌های اسکلتی-عضلانی شوند کمک می‌کند." data-link="kim-mho.html">
+                <div class="card" data-description="برای ارزیابی کارهایی است که شامل حرکات یکنواخت و تکراری دست‌ها و بازوها می‌شود. این کارها معمولاً در حالت نشسته یا ایستاده ثابت انجام می‌گیرند و بیشتر با ابزارهای کوچک یا ماشین‌های دستی صورت می‌گیرند. وزن اجسام جابه‌جا شده در این فعالیت‌ها معمولاً کمتر از ۳ کیلوگرم است." data-link="kim-mho.html" data-pdf="data/KIM-MHO.pdf">
                     <h2 class="card-title">فعالیت‌های دستی</h2>
                     <p class="card-subtitle">KIM-MHO</p>
                     <div class="card-images">
@@ -266,7 +348,7 @@
                 </div>
 
                 <!-- کارت 4: KIM-BM -->
-                <div class="card" data-description="این روش برای ارزیابی ریسک‌های ناشی از جابجایی بدنی طراحی شده است. این روش به شناسایی وظایفی که ممکن است باعث آسیب‌های اسکلتی-عضلانی شوند کمک می‌کند." data-link="kim-bm.html">
+                <div class="card" data-description="این روش برای ارزیابی فعالیت‌های جابجایی و رفت‌وآمد در محیط کار استفاده می‌شود؛ یعنی کارهایی که فشار اصلی آن‌ها ناشی از حرکت و جابجایی در فضا است، نه از اعمال مستقیم نیرو با دست یا بدن. در این روش، توجه بر روی مسیرها، شرایط محیطی و سختی جابجایی است." data-link="kim-bm.html" data-pdf="data/KIM-BM.pdf">
                     <h2 class="card-title">جابجایی بدنی</h2>
                     <p class="card-subtitle">KIM-BM</p>
                     <div class="card-images">
@@ -283,7 +365,7 @@
                 </div>
 
                 <!-- کارت 5: KIM-BF -->
-                <div class="card" data-description="این روش برای ارزیابی ریسک‌های ناشی از وظایف نیازمند اعمال نیرو با تمام بدن طراحی شده است. این روش به شناسایی وظایفی که ممکن است باعث آسیب‌های اسکلتی-عضلانی شوند کمک می‌کند." data-link="kim-bf.html">
+                <div class="card" data-description="این روش برای ارزیابی فعالیت‌هایی است که در آن‌ها نیاز به اعمال نیروی زیاد و عمدتاً ثابت وجود دارد. در چنین کارهایی معمولاً از دست‌ها برای وارد کردن نیرو استفاده می‌شود، اما فشار می‌تواند به شانه‌ها، کمر، پاها و کف پا هم منتقل شود. این نوع فعالیت‌ها معمولاً آنقدر سنگین هستند که انجامشان در حالت نشسته دشوار یا غیرممکن است." data-link="kim-bf.html" data-pdf="data/KIM-BF.pdf">
                     <h2 class="card-title">اعمال نیرو با تمام بدن</h2>
                     <p class="card-subtitle">KIM-BF</p>
                     <div class="card-images">
@@ -300,7 +382,7 @@
                 </div>
 
                 <!-- کارت 6: KIM-ABP -->
-                <div class="card" data-description="این روش برای ارزیابی ریسک‌های ناشی از پوسچرهای بدنی نامناسب طراحی شده است. این روش به شناسایی وظایفی که ممکن است باعث آسیب‌های اسکلتی-عضلانی شوند کمک می‌کند." data-link="kim-abp.html">
+                <div class="card" data-description="این روش برای ارزیابی فعالیت‌هایی است که در آن‌ها بدن در پوسچرهای نامناسب، سخت و پرتنش قرار می‌گیرد. این وضعیت‌ها معمولاً به دلیل شرایط کار ایجاد می‌شوند و یا برای مدتی طولانی (بیش از ۱ دقیقه) ادامه پیدا می‌کنند یا به‌طور تکراری (بیش از ۱۰ ثانیه) تکرار می‌شوند." data-link="kim-abp.html" data-pdf="data/KIM-ABP.pdf">
                     <h2 class="card-title">پوسچرهای بدنی نامناسب</h2>
                     <p class="card-subtitle">KIM-ABP</p>
                     <div class="card-images">
@@ -319,26 +401,44 @@
         </div>
 
         <div class="description-container">
-            <h2>توضیحات روش</h2>
+            <h2>کاربرد این روش</h2>
             <div class="description-content" id="descriptionText">
-                این روش برای ارزیابی ریسک‌های ناشی از بلند کردن، نگه داشتن و حمل بارهای دستی طراحی شده است. این روش به شناسایی وظایفی که ممکن است باعث آسیب‌های اسکلتی-عضلانی شوند کمک می‌کند.
+                برای ارزیابی وظایف بلند کردن، نگه داشتن و حمل دستی بارهایی بیش از ۳ کیلوگرم به‌کار می‌رود. این بارها می‌توانند اجسام، افراد یا حتی حیوانات باشند و شامل پایین آوردن یا جابه‌جایی افقی بار هم می‌شود.
             </div>
             <a href="kim-lhc.html" class="start-button" id="startButton">شروع ارزیابی</a>
+            <a href="data/KIM-LHC.pdf" class="pdf-link" id="pdfButton" target="_blank" onclick="disablePrint(event)">مشاهده راهنمای کامل (PDF)</a>
         </div>
     </div>
 
     <div class="footer">
-    <p>
-        With kind permission of the Bundesanstalt für Arbeitsschutz und Arbeitsmedizin (BAuA).<br>
-        Translation and software development by Ahmad Salimi.
-    </p>
-</div>
+        <div class="copyright">
+            <div class="copyright-farsi">
+                با کسب اجازه از مؤسسه فدرال ایمنی و سلامت شغلی آلمان (BAuA)<br>
+                ترجمه و توسعه نرم‌افزار: احمد سلیمی
+            </div>
+            <div class="copyright-german">
+                With kind permission of the Bundesanstalt für Arbeitsschutz und Arbeitsmedizin (BAuA)<br>
+                Translation and software development by Ahmad Salimi
+            </div>
+        </div>
+        
+        <div class="contact-info">
+            <p>اطلاعات تماس:</p>
+            <p>ایمیل: salimi.ah@iums.ac.ir</p>
+            <div class="social-links">
+                <a href="https://www.instagram.com/white.vulture" target="_blank" title="اینستاگرام">
+                    <i class="fab fa-instagram"></i>
+                </a>
+            </div>
+        </div>
+    </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const cards = document.querySelectorAll('.card');
             const descriptionText = document.getElementById('descriptionText');
             const startButton = document.getElementById('startButton');
+            const pdfButton = document.getElementById('pdfButton');
             
             // فعال کردن اولین کارت به صورت پیش‌فرض
             cards[0].classList.add('active');
@@ -358,9 +458,37 @@
                     // به‌روزرسانی لینک دکمه شروع ارزیابی
                     const link = this.getAttribute('data-link');
                     startButton.href = link;
+                    
+                    // به‌روزرسانی لینک PDF
+                    const pdfLink = this.getAttribute('data-pdf');
+                    pdfButton.href = pdfLink;
                 });
             });
         });
+
+        // تابع برای جلوگیری از پرینت
+        function disablePrint(event) {
+            // باز کردن PDF در تب جدید
+            const pdfUrl = event.currentTarget.href;
+            const newWindow = window.open(pdfUrl, '_blank');
+            
+            // اضافه کردن event listener برای جلوگیری از پرینت
+            if (newWindow) {
+                newWindow.addEventListener('beforeprint', function(e) {
+                    e.preventDefault();
+                    alert('پرینت این سند مجاز نمی‌باشد.');
+                    return false;
+                });
+                
+                newWindow.addEventListener('afterprint', function(e) {
+                    e.preventDefault();
+                    return false;
+                });
+            }
+            
+            // جلوگیری از رفتار پیش‌فرض لینک (به دلیل باز کردن پنجره جدید در بالا)
+            event.preventDefault();
+        }
     </script>
 </body>
 </html>
