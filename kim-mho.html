@@ -486,7 +486,7 @@
                 -webkit-print-color-adjust: exact !important;
                 color-adjust: exact !important;
             }
-            body > *:not(#step8-card) {
+            body > *:not(#specifications):not(#step8-card) {
                 display: none !important;
             }
             #printButton, .reset-container {
@@ -558,7 +558,105 @@
             .risk-row-4 { background-color: #FF3333 !important; color: #721c24 !important; }
             .risk-table tbody tr.current-risk-level { box-shadow: 0 0 0 3px #000000 inset !important; }
         }
-    </style>
+    
+.row {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin-bottom: 10px;
+}
+.date-row {
+    display: flex;
+    gap: 8px;
+}
+.row label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+.row input, .row select {
+    padding: 6px;
+    border-radius: 4px;
+    border: 1px solid #ced4da;
+}
+
+
+@media print {
+    @page {
+        size: A4 portrait;
+        margin: 1.5cm;
+    }
+    body > *:not(#specifications):not(#step8-card) {
+        display: none !important;
+    }
+    #specifications, #step8-card {
+        display: block !important;
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        box-shadow: none !important;
+        border: none !important;
+        page-break-inside: avoid;
+    }
+    #specifications h2 {
+        font-size: 14pt;
+        margin-bottom: 8px;
+    }
+    #spec-summary {
+        font-size: 11pt;
+        line-height: 1.4;
+        border: 1px solid #ccc;
+        padding: 8px;
+        border-radius: 6px;
+        background: #f9f9f9;
+    }
+    #specifications .row, 
+    #specifications input, 
+    #specifications select {
+        display: none !important;
+    }
+}
+
+
+@media print {
+    @page {
+        size: A4 portrait;
+        margin: 1.5cm;
+    }
+    body {
+        font-family: Vazirmatn, Tahoma, sans-serif !important;
+        font-size: 10pt !important;
+    }
+    body > *:not(#specifications):not(#step8-card) {
+        display: none !important;
+    }
+    #specifications, #step8-card {
+        display: block !important;
+        width: 100% !important;
+        margin: 0 0 10px 0 !important;
+        padding: 0 !important;
+        box-shadow: none !important;
+        border: none !important;
+        page-break-inside: avoid;
+    }
+    #specifications h2, #step8-card h2 {
+        font-size: 13pt !important;
+        color: #007bff !important;
+        border-bottom: 2px solid #007bff !important;
+        margin-bottom: 8px !important;
+    }
+    #specifications label {
+        font-weight: bold;
+        font-size: 10pt !important;
+    }
+    #specifications input, #specifications select {
+        font-size: 10pt !important;
+        padding: 4px 6px !important;
+        border: 1px solid #999 !important;
+    }
+}
+
+</style>
 </head>
 <body>
 
@@ -573,6 +671,97 @@
             بازنشانی فرم
         </button>
     </div>
+
+
+<div class="card" id="specifications">
+    <h2>مشخصات</h2>
+    <div class="row">
+        <div>
+            <label>محل کار / فعالیت فرعی:</label>
+            <input id="location" placeholder="مثلاً: انبار بسته‌بندی - خط ۲" type="text">
+        </div>
+        <div>
+            <label>ارزیاب:</label>
+            <input id="evaluator" placeholder="نام ارزیاب" type="text">
+        </div>
+    </div>
+    
+    <div class="row">
+        <div>
+            <label>مدت زمان روز کاری (ساعت):</label>
+            <input id="workday" type="number" min="1" step="0.5" placeholder="مثلاً 8">
+        </div>
+        <div>
+            <label>مدت زمان فعالیت فرعی (دقیقه):</label>
+            <input id="subtaskDuration" type="number" min="0" step="1" placeholder="مثلاً 45">
+        </div>
+        <div style="grid-column: span 1 / auto;">
+            <label>تاریخ (شمسی):</label>
+            <div class="date-row">
+                <select id="year">
+                    <option value="">سال</option>
+                    <option value="1401">1401</option>
+                    <option value="1402">1402</option>
+                    <option value="1403">1403</option>
+                    <option value="1404">1404</option>
+                    <option value="1405">1405</option>
+                    <option value="1406">1406</option>
+                    <option value="1407">1407</option>
+                </select>
+                <select id="month">
+                    <option value="">ماه</option>
+                    <option value="1">فروردین</option>
+                    <option value="2">اردیبهشت</option>
+                    <option value="3">خرداد</option>
+                    <option value="4">تیر</option>
+                    <option value="5">مرداد</option>
+                    <option value="6">شهریور</option>
+                    <option value="7">مهر</option>
+                    <option value="8">آبان</option>
+                    <option value="9">آذر</option>
+                    <option value="10">دی</option>
+                    <option value="11">بهمن</option>
+                    <option value="12">اسفند</option>
+                </select>
+                <select id="day">
+                    <option value="">روز</option>
+                    <option value="1">1</option>
+<option value="2">2</option>
+<option value="3">3</option>
+<option value="4">4</option>
+<option value="5">5</option>
+<option value="6">6</option>
+<option value="7">7</option>
+<option value="8">8</option>
+<option value="9">9</option>
+<option value="10">10</option>
+<option value="11">11</option>
+<option value="12">12</option>
+<option value="13">13</option>
+<option value="14">14</option>
+<option value="15">15</option>
+<option value="16">16</option>
+<option value="17">17</option>
+<option value="18">18</option>
+<option value="19">19</option>
+<option value="20">20</option>
+<option value="21">21</option>
+<option value="22">22</option>
+<option value="23">23</option>
+<option value="24">24</option>
+<option value="25">25</option>
+<option value="26">26</option>
+<option value="27">27</option>
+<option value="28">28</option>
+<option value="29">29</option>
+<option value="30">30</option>
+<option value="31">31</option>
+                </select>
+            </div>
+        </div>
+    </div>
+</div>
+
 
     <div class="card" id="step1">
         <h2>گام ۱: تعیین امتیاز زمان</h2>
@@ -1459,6 +1648,13 @@
 
     // ---------------------- بازنشانی ----------------------
     function resetForm() {
+    // پاک کردن تمام input و select ها (شامل بخش مشخصات)
+    document.querySelectorAll('input[type=text], input[type=number], select').forEach(el => {
+        el.value = '';
+        if (el.tagName.toLowerCase() === 'select') {
+            el.selectedIndex = 0;
+        }
+    });
         // Reset Step 1
         document.querySelectorAll('.selectable-cell').forEach(cell => { cell.classList.remove('selected'); });
         document.getElementById('timeCustom').value = '';
@@ -1544,6 +1740,51 @@
     }
 
     document.addEventListener('DOMContentLoaded', init);
+
+// (حذف شد: نیازی به spec-summary نیست)
+window.onbeforeprint = function() {
+    const loc = document.getElementById('location').value || '—';
+    const evalr = document.getElementById('evaluator').value || '—';
+    const y = document.getElementById('year').value;
+    const m = document.getElementById('month').value;
+    const d = document.getElementById('day').value;
+    const dateText = (y && m && d) ? `${y}/${m}/${d}` : '—';
+
+    document.getElementById('print-location').textContent = loc;
+    document.getElementById('print-evaluator').textContent = evalr;
+    document.getElementById('print-date').textContent = dateText;
+
+    document.getElementById('spec-summary').style.display = 'block';
+};
+
+
+document.getElementById('printButton').addEventListener('click', () => {
+    const location = document.getElementById('location').value || '—';
+    const evaluator = document.getElementById('evaluator').value || '—';
+    const workday = document.getElementById('workday').value || '—';
+    const subtaskDuration = document.getElementById('subtaskDuration').value || '—';
+    const year = document.getElementById('year').value;
+    const month = document.getElementById('month').value;
+    const day = document.getElementById('day').value;
+    const date = (year && month && day) ? `${year}/${month}/${day}` : '—';
+
+    let summary = `
+        <div id="spec-summary">
+            <p><strong>محل کار/فعالیت:</strong> ${location}</p>
+            <p><strong>ارزیاب:</strong> ${evaluator}</p>
+            <p><strong>مدت روز کاری:</strong> ${workday} ساعت</p>
+            <p><strong>مدت فعالیت فرعی:</strong> ${subtaskDuration} دقیقه</p>
+            <p><strong>تاریخ:</strong> ${date}</p>
+        </div>
+    `;
+    document.getElementById('specifications').insertAdjacentHTML('beforeend', summary);
+
+    window.print();
+
+    const summaryDiv = document.getElementById('spec-summary');
+    if (summaryDiv) summaryDiv.remove();
+});
+
 </script>
 </body>
 </html>
